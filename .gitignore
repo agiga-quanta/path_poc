@@ -1,3 +1,8 @@
+/pdf_files
+/txt_files
+/nlp_files
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

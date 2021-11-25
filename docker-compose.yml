@@ -1,0 +1,67 @@
+version: '3.9'
+
+#__author__ = "Nghia Doan"
+#__company__ = "Agiga Quanta Inc."
+#__copyright__ = "Copyright 2021"
+#__version__ = "0.1.0"
+#__maintainer__ = "Nghia Doan"
+#__email__ = "nghia71@gmail.com"
+#__status__ = "Development"
+
+##############################################################################
+#
+# services
+#
+##############################################################################
+services:
+
+  ####################
+  # tika:
+  #
+  tika:
+    image: apache/tika:2.1.0
+    hostname: tika
+    container_name: tika
+    ports:
+      - 9998:9998
+
+  ####################
+  # extractor:
+  #
+  pdf_extractor:
+    build:
+      context: ./pdf_extractor
+      dockerfile: Dockerfile
+    image: agigaquanta/pdf_extractor:1.0.0
+    hostname: pdf_extractor
+    container_name: pdf_extractor
+    volumes:
+      - ./pdf_files:/input
+      - ./txt_files:/output
+
+  ####################
+  # nlp:
+  #
+  nlp:
+    build:
+      context: ./nlp
+      dockerfile: Dockerfile
+    image: agigaquanta/nlp:1.0.0
+    hostname: nlp
+    container_name: nlp
+    # networks:
+    #   - backend
+    # ports:
+    #   - 8000:8000
+    volumes:
+      - ./conf:/conf
+      - ./txt_files:/input
+      - ./nlp_files:/output
+
+################################################################################
+#
+# networks
+#
+################################################################################
+# networks:
+#   backend:
