@@ -1,6 +1,4 @@
-/pdf_files
-/txt_files
-/nlp_files
+/data
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

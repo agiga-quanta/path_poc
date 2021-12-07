@@ -15,6 +15,10 @@ version: '3.9'
 ##############################################################################
 services:
 
+##############################
+# common services
+#
+
   ####################
   # tika:
   #
@@ -26,7 +30,25 @@ services:
       - 9998:9998
 
   ####################
-  # extractor:
+  # stanford_nlp:
+  #
+  stanford_nlp:
+    build:
+      context: ./stanford_nlp
+      dockerfile: Dockerfile
+    image: agigaquanta/stanford_nlp:1.0.0
+    hostname: stanford_nlp
+    container_name: stanford_nlp
+    ports:
+      - 9000:9000
+
+
+##############################
+# data processing services
+#
+
+  ####################
+  # pdf_extractor:
   #
   pdf_extractor:
     build:
@@ -36,32 +58,23 @@ services:
     hostname: pdf_extractor
     container_name: pdf_extractor
     volumes:
-      - ./pdf_files:/input
-      - ./txt_files:/output
+      - ./data/pdf:/pdf
+      - ./data/xhtml:/xhtml
 
   ####################
-  # nlp:
+  # doc_processor:
   #
-  nlp:
+  doc_processor:
     build:
-      context: ./nlp
+      context: ./doc_processor
       dockerfile: Dockerfile
-    image: agigaquanta/nlp:1.0.0
-    hostname: nlp
-    container_name: nlp
-    # networks:
-    #   - backend
-    # ports:
-    #   - 8000:8000
+    image: agigaquanta/doc_processor:1.0.0
+    hostname: doc_processor
+    container_name: doc_processor
     volumes:
       - ./conf:/conf
-      - ./txt_files:/input
-      - ./nlp_files:/output
-
-################################################################################
-#
-# networks
-#
-################################################################################
-# networks:
-#   backend:
+      - ./data/xhtml:/xhtml
+      - ./data/json:/json
+      - ./data/nlp:/nlp
+      - ./data/txt:/txt
+      - ./data/images:/images

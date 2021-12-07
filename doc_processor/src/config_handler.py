@@ -12,43 +12,6 @@ from configparser import ConfigParser, ExtendedInterpolation
 
 
 class ConfigHandler(object):
-    """
-    Configuration file can be created in standard .ini format.
-    Section: configuration options are grouped with in sections.
-    - Each section has a header where it begins
-    - The section scope is valid until the next section header or EOF
-    - Each config option consists of one or multiple lines
-
-    [this_is_the_section_header]
-    this_is_the_option_name=this_is_the_string_value
-
-    By default all option values are string but can be in other format
-    as well. All values must be described in string format
-    and can be converted by using get_eval_option()
-
-    Examples:
-    number_of_files=1
-    file_name=/data/id_list.txt
-    list_of_years=1977,1978,1979
-    list_of_names_separated_by_commas=Alpha,Beta,Gamma
-    dictionary_of_departments={
-      'business': ['Mr. X', 'Ms. Y'],
-      'finance': ['Mrs. Z'],
-      }
-
-    The technique used to support static configuration file
-    is from so-called Abstract Syntax Tree (AST), which is a standard
-    Python module (https://docs.python.org/3.5/library/ast.html).
-
-    ConfigHandler.get_eval_option(self, section_name, option_name)
-    uses ast.literal_eval() to parse and convert textual values
-    into standard Python [nested] object instances.
-
-    Note 1: dynamic configuration can also used by changing file content
-    and applying reload() function.
-    Note 2: Green Tree Snakes is a very detailed documentation for AST
-    (https://greentreesnakes.readthedocs.io/en/latest/)
-    """
 
     def __init__(self, config_filename):
         if config_filename is None:
