@@ -12,6 +12,7 @@ from json import load, dump
 from math import log
 from os import listdir
 from os.path import isfile, join
+from random import randint
 
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
@@ -28,6 +29,7 @@ class DocSummarizer(object):
         self.summ_path = config.get_config_option('content', 'summ_path')
         self.imag_path = config.get_config_option('content', 'imag_path')
         self.summ_pcnt = config.get_eval_option('summary', 'summ_pcnt')
+        self.imag_opts = config.get_eval_option('summary', 'imag_opts')
         self.ASIS = config.get_eval_option('gather', 'as_is')
 
     def compute_tf_idf(self, number, aent_dict, apos_dict, adoc_dict):
@@ -80,17 +82,18 @@ class DocSummarizer(object):
             print(c, self.apos_dict[c])
 
     def generate_wordcloud(self, doc_id, doc_dict):
-        cloud = WordCloud( width=1600, height=1200)
-        freq_dict = dict()
-        for t in ['ent', 'pos']:
-            max_e = max(e['tf_idf'] for  e in doc_dict[t].values())
-            if max_e > 0.0:
-                freq_dict.update({ c: e['tf_idf'] for c, e in doc_dict[t].items() })
-            else:
-                freq_dict.update({ c: e['tf'] for c, e in doc_dict[t].items() })
-        cloud.generate_from_frequencies(freq_dict)
-        image_file = '%s/%s.png' % (self.imag_path, doc_id) 
-        cloud.to_file(image_file)
+        for opt_name, opt in self.imag_opts.items():
+            cloud = WordCloud( colormap=opt['colormap'], background_color=opt['background_color'], width=opt['width'], height=opt['height'] )
+            freq_dict = dict()
+            for t in ['ent', 'pos']:
+                max_e = max(e['tf_idf'] for  e in doc_dict[t].values())
+                if max_e > 0.0 and opt_name != '__TF__':
+                    freq_dict.update({ c: e['tf_idf'] for c, e in doc_dict[t].items() })
+                else:
+                    freq_dict.update({ c: e['tf'] for c, e in doc_dict[t].items() })
+            cloud.generate_from_frequencies(freq_dict)
+            image_file = '%s%s/%s.png' % (self.imag_path, opt['path'], doc_id) 
+            cloud.to_file(image_file)
 
     def generate_summary(self, doc_id, doc_dict):
 
