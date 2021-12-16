@@ -7,24 +7,17 @@ __email__ = "nghia71@gmail.com"
 __status__ = "Development"
 
 
-import re
-from regex_process import OP_MAP
+from regex_process import init_ops
 
 
 class SectionSplitter(object):
 
     def __init__(self, config):
-        self.CLEAN = self.init_ops(config.get_eval_option('section', 'cleaner'))
-        self.WORDS = self.init_ops(config.get_eval_option('section', 'st_word'))
-        self.NAMES = config.get_eval_option('section', 'st_name')
-        self.POSTS = config.get_eval_option('section', 'st_post')
-        self.SUBS = self.init_ops(config.get_eval_option('section', 'st_subs'))
-
-    def init_ops(self, ops):
-        for op in ops:
-            op['func'] = OP_MAP[op['func']]
-            op['ex'] = re.compile(op['ex']) if 'c' in op and op['c'] else re.compile(op['ex'], re.IGNORECASE)
-        return ops
+        self.WORDS = init_ops(config.get_eval_option('section_splitter', 'st_word'))
+        self.NAMES = config.get_eval_option('section_splitter', 'st_name')
+        self.POSTS = config.get_eval_option('section_splitter', 'st_post')
+        self.SUBS = init_ops(config.get_eval_option('section_splitter', 'st_subs'))
+        self.DEBUG = int(config.get_config_option('section_splitter', 'debug'))
 
     def get_text(self, text, anchors, section_info):
         prev_section, prev_t, curr_section, curr_t = section_info
@@ -32,24 +25,27 @@ class SectionSplitter(object):
             return text[anchors[prev_section][prev_t]:anchors[curr_section][curr_t]]
         return text[anchors[prev_section][prev_t]:]
 
-    def split(self, t_list):
-        pt_list = []
-        for t in t_list:
-            for op in self.CLEAN:
-                t = op['func'](op, t)
-            pt_list.append(t if t.endswith('\n') else t + '\n')
-
-        doc = ''.join(pt_list)
+    def split(self, text):
         sections = dict()
+
+        if self.DEBUG >= 1:
+            print('\nSECTIONS -----')
+
         from_pos = 0
         for op in self.WORDS:
-            r = op['func'](op, doc, from_pos)
-            sections[r['k']] = {'s': r['s'], 'e': r['e']}
-            # print("[%s]\t[%d:%d]" % (r['k'], r['s'], r['e']))
+            r = op['func'](op, text, from_pos)
+            try:
+                if self.DEBUG >= 2:
+                    print("[%s]\t[%d:%d]" % (r['k'], r['s'], r['e']))
+                sections[r['k']] = {'s': r['s'], 'e': r['e']}
+            except TypeError as te:
+                print(op['ex'])
+                print(text[from_pos:])
+                exit(1)
             from_pos = r['e']
     
         for name in self.NAMES:
-            val = self.get_text(doc, sections, self.POSTS[name])
+            val = self.get_text(text, sections, self.POSTS[name])
             sections[name]['t'] = val
             assert len(val) > self.NAMES[name], '[%s] [%s]' % (name, val)
     
@@ -62,11 +58,14 @@ class SectionSplitter(object):
                     from_section['e'] = from_section['s'] + pos
                     from_section['t'] = from_section['t'][:pos]
 
-        print('\nSECTIONS -----')
-        for name, section in sections.items():
-            section = sections[name]
-            s, e, l = section['s'], section['e'], len(section['t'])
-            print(f"{name:20} {s:10} {e:10} {l:10}")
+        if self.DEBUG >= 1:
+            for name, section in sections.items():
+                section = sections[name]
+                s, e, l, t = section['s'], section['e'], len(section['t']), section['t']
+                if self.DEBUG == 1:
+                    print(f"{name:20} {s:10} {e:10} {l:10}")
+                elif self.DEBUG == 2:
+                    print(f"\n{name:20} {s:10} {e:10} {l:10}\n>>>>>\n{t}\n<<<<<")
 
         return sections
 

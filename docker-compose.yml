@@ -75,6 +75,3 @@ services:
       - ./conf:/conf
       - ./data/xhtml:/xhtml
       - ./data/json:/json
-      - ./data/nlp:/nlp
-      - ./data/txt:/txt
-      - ./data/images:/images

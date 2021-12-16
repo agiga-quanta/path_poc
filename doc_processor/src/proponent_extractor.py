@@ -7,30 +7,27 @@ __email__ = "nghia71@gmail.com"
 __status__ = "Development"
 
 
-import re
-from regex_process import OP_MAP
+from copy import deepcopy
+from regex_process import init_ops
 
 
-class ProponentProcessor(object):
+class ProponentExtractor(object):
 
     def __init__(self, config):
-        self.CORRECT = self.init_ops(config.get_eval_option('proponent', 'correct'))
-        self.EXTRACT = self.init_ops(config.get_eval_option('proponent', 'extract'))
-        self.CLEANUP = self.init_ops(config.get_eval_option('proponent', 'cleanup'))
+        self.CORRECT = init_ops(config.get_eval_option('proponent_extractor', 'correct'))
+        self.EXTRACT = init_ops(config.get_eval_option('proponent_extractor', 'extract'))
+        self.CLEANUP = init_ops(config.get_eval_option('proponent_extractor', 'cleanup'))
+        self.DEBUG = int(config.get_config_option('proponent_extractor', 'debug'))
     
-    def init_ops(self, ops):
-        for op in ops:
-            op['func'] = OP_MAP[op['func']]
-            op['ex'] = re.compile(op['ex']) if 'c' in op and op['c'] else re.compile(op['ex'], re.IGNORECASE)
-        return ops
-
-    def extract(self, text, nlp):
+    def extract(self, doc_text, nlp, spl, doc_id):
         section = dict()
-        # print('GIVEN -----\n%s\n----- GIVEN\n' % text)
+        text = deepcopy(doc_text)
+
+        if self.DEBUG >= 1:
+            print('\nPROPONENT -----')
 
         for op in self.CORRECT:
             text = op['func'](op, text)
-        # print('CORRECTED -----\n%s\n----- CORRECTED\n' % text)
 
         for op in self.EXTRACT:
             r = op['func'](op, text)
@@ -41,15 +38,13 @@ class ProponentProcessor(object):
                     if v not in section[k]:
                         section[k].append(v)
                     text = text.replace(v, ' ')
-        # print('EXTRACTED -----\n%s\n----- EXTRACTED\n' % text)
 
         text = text.replace('\n', ', ')
-        for op in self.CLEANUP:
-            text = op['func'](op, text)
-        # print('CLEANUP -----\n%s\n----- CLEANUP\n' % text)
 
         nlp_doc = nlp.process(text)
-        entities = nlp_doc['sentences'][0]['entitymentions']
+        spl.process(nlp_doc, doc_id)
+
+        entities = sum([sent['entitymentions'] for sent in nlp_doc['sentences']], [])
         used_entities = set()
         search_list = ['ORGANIZATION', 'PERSON', 'TITLE']
         i = 0
@@ -61,8 +56,8 @@ class ProponentProcessor(object):
                     section[e_ner.lower()] = []
                 if e_txt not in section[e_ner.lower()]:
                     section[e_ner.lower()].append(e_txt)
-                f_end = e_end + 1
                 used_entities.add(e_beg)
+                f_end = e_end + 1
             i += 1
         
         entities = nlp_doc['sentences'][0]['entitymentions'][::-1]
@@ -90,10 +85,13 @@ class ProponentProcessor(object):
             else:
                 section['place'] = [text.strip()]
 
-        print('\nPROPONENT -----')
-        for k in section.keys():
-            v = section[k]
-            if k not in ['s', 'e', 'val']:
-                print(f"{k:20} {v}")
+        assert len(section) >= 4, section
+        section['nlp'] = nlp_doc
+
+        if self.DEBUG >= 1:
+            for k in section.keys():
+                if self.DEBUG == 1 and k == 'nlp':
+                    continue
+                print(f"{k:20} {section[k]}")
 
         return section

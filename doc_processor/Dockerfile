@@ -13,8 +13,11 @@ WORKDIR /
 COPY src/ .
 COPY requirements.txt ./
 RUN pip3 install -r /requirements.txt
+RUN mkdir nltk_data
+RUN python -m nltk.downloader -d ./nltk_data wordnet stopwords
+ENV NLTK_DATA=/nltk_data
 
 ####################
 # Start the app
 #
-ENTRYPOINT ["python", "doc_process.py"]
+ENTRYPOINT ["python", "doc_processor.py"]
