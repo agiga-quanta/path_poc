@@ -8,6 +8,10 @@ __status__ = "Development"
 
 
 from copy import deepcopy
+
+import geocoder
+import requests
+
 from regex_process import init_ops
 
 
@@ -19,6 +23,7 @@ class LocationExtractor(object):
         self.CLEANUP = init_ops(config.get_eval_option('location_extractor', 'cleanup'))
         self.DOC_4_TAGS = init_ops(config.get_eval_option('location_extractor', 'doc_4_tags'))
         self.DEBUG = int(config.get_config_option('location_extractor', 'debug'))
+        self.session = requests.Session()
     
     def extract(self, doc_text, nlp, spl, doc_id):
         section = dict()
@@ -52,6 +57,15 @@ class LocationExtractor(object):
                 spl.process(nlp_doc, doc_id)
                 cv.append({'t': e, 'nlp': nlp_doc})
             section[k] = cv
+
+        loc = ', '.join([section[name][0]['t'] for name in ['nearest_community', 'municipality', 'province'] if name in section])
+        g = geocoder.osm(loc, session=self.session)
+        if g.latlng:
+            section['geocode'] = [{'t': g.latlng}]
+        else:
+            loc = ', '.join([section[name][0]['t'] for name in ['nearest_community', 'province'] if name in section])
+            g = geocoder.osm(loc, session=self.session)
+            section['geocode'] = [{'t': g.latlng}]
         
         if self.DEBUG >= 1:
             for k in section.keys():

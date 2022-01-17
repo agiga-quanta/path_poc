@@ -9,7 +9,7 @@ __status__ = "Development"
 
 from json import load
 from os import listdir
-from os.path import isfile, join
+from os. path import isfile, join
 import re
 import sys
 from config_handler import ConfigHandler
