@@ -9,6 +9,7 @@ from description_extractor import DescriptionExtractor
 from header_extractor import HeaderExtractor
 from location_extractor import LocationExtractor
 from nlp_processor import NLPProcessor
+from pos_processor import POSProcessor
 from proponent_extractor import ProponentExtractor
 from section_splitter import SectionSplitter
 from spell_checker import SpellChecker
@@ -49,6 +50,7 @@ if __name__ == '__main__':
     des_extractor = DescriptionExtractor(config)
     con_extractor = ConditionExtractor(config)
     spl_checker = SpellChecker(config)
+    pos_processor = POSProcessor(config)
 
     for count in range(start, start+number):
         file_name = html_files[count]
@@ -76,15 +78,14 @@ if __name__ == '__main__':
                     p_list.append(p_text)
                 t_list.append(p_list)
 
-            doc_text = txt_corrector.process(t_list)
-            id_dict, doc_text = hdr_extractor.process(doc_text)
-            sections = sec_splitter.split(doc_text)
             doc = dict()
-            doc['headers'] = id_dict
+            doc_text = txt_corrector.process(t_list)
+            doc['headers'], doc_text = hdr_extractor.process(doc_text)
+            sections = sec_splitter.split(doc_text)
             doc['proponent'] = prp_extractor.extract(sections['proponent']['t'], nlp_processor, spl_checker, doc_id)
-            doc['location'] = loc_extractor.extract(sections['location']['t'], nlp_processor, spl_checker, doc_id)
-            doc['description'] = des_extractor.extract(sections['description']['t'], nlp_processor, spl_checker, doc_id)
-            doc['conditions'] = con_extractor.extract(sections['conditions']['t'], nlp_processor, spl_checker, doc_id)
+            doc['location'] = loc_extractor.extract(sections['location']['t'], doc_id)
+            doc['description'] = des_extractor.extract(sections['description']['t'], nlp_processor, spl_checker, pos_processor, doc_id)
+            doc['conditions'] = con_extractor.extract(sections['conditions']['t'], nlp_processor, spl_checker, pos_processor, doc_id)
 
         with open(join(json_path, doc_id + '.json'), 'wt') as ofile:
             dump(doc, ofile)

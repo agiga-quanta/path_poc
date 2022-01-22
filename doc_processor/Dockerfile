@@ -17,7 +17,9 @@ RUN mkdir nltk_data
 RUN python -m nltk.downloader -d ./nltk_data wordnet stopwords
 ENV NLTK_DATA=/nltk_data
 
+COPY process_doc.sh .
+
 ####################
 # Start the app
 #
-ENTRYPOINT ["python", "doc_processor.py"]
+ENTRYPOINT [ "/process_doc.sh" ]

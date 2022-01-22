@@ -25,7 +25,7 @@ class LocationExtractor(object):
         self.DEBUG = int(config.get_config_option('location_extractor', 'debug'))
         self.session = requests.Session()
     
-    def extract(self, doc_text, nlp, spl, doc_id):
+    def extract(self, doc_text, doc_id):
         section = dict()
         text = deepcopy(doc_text)
 
@@ -49,29 +49,36 @@ class LocationExtractor(object):
             (len(section) == self.MAX_TAG - 1 and any([op['func'](op, doc_id) is not None for regex in self.DOC_4_TAGS])), section
 
         for k in section.keys():
-            cv = []
-            for e in section[k]:
-                for op in self.CLEANUP:
-                    e = op['func'](op, e)
-                nlp_doc = nlp.process(e)
-                spl.process(nlp_doc, doc_id)
-                cv.append({'t': e, 'nlp': nlp_doc})
-            section[k] = cv
+            e = section[k][0]
+            for op in self.CLEANUP:
+                e = op['func'](op, e)
+            section[k] = e
 
-        loc = ', '.join([section[name][0]['t'] for name in ['nearest_community', 'municipality', 'province'] if name in section])
-        g = geocoder.osm(loc, session=self.session)
-        if g.latlng:
-            section['geocode'] = [{'t': g.latlng}]
-        else:
-            loc = ', '.join([section[name][0]['t'] for name in ['nearest_community', 'province'] if name in section])
+        hdrs = [
+            ['nearest_community', 'municipality', 'province'],
+            ['municipality', 'nearest_community', 'province'],
+            ['municipality', 'province'],
+            ['nearest_community', 'province'],
+        ]
+        for hdr in hdrs:
+            loc = ', '.join([
+                section[name][section[name].find(' of ') + 4 if ' of ' in section[name] else 0:]
+                for name in hdr if name in section
+            ])
             g = geocoder.osm(loc, session=self.session)
-            section['geocode'] = [{'t': g.latlng}]
+            if g.latlng:
+                print(loc, g.latlng)
+                section['geocode'] = g.latlng
+                break    
+        if 'geocode' not in section:
+            section['geocode'] = []
         
-        if self.DEBUG >= 1:
-            for k in section.keys():
-                if self.DEBUG == 1:
-                    print(f"{k:20} {[v['t'] for v in section[k]]}")
-                else:
-                    print(f"{k:20} {section[k]}")
+        for k in section.keys():
+            if self.DEBUG == 1:
+                print(f"{k:20} {section[k]}")
+
+        for k in ['nearest_community', 'municipality', 'province', 'watercourse', 'geo_location']:
+            if k not in section:
+                section[k] = ''
 
         return section

@@ -19,7 +19,7 @@ class ConditionExtractor(object):
         self.CLEANER = init_ops(config.get_eval_option('condition_extractor', 'cleaner'))
         self.DEBUG = config.get_eval_option('condition_extractor', 'debug')
     
-    def extract(self, doc_text, nlp, spl, doc_id):
+    def extract(self, doc_text, nlp, spl, pos, doc_id):
         section = []
         text = deepcopy(doc_text)
 
@@ -68,19 +68,25 @@ class ConditionExtractor(object):
             section[i][1] = content
 
         for i in range(0, len(section)):
-            content = section[i][1]
+            bullet, content = section[i]
             nlp_doc = nlp.process(content)
+            if 'sentences' not in nlp_doc or not nlp_doc['sentences']:
+                continue
             spl.process(nlp_doc, doc_id)
-            section[i][1] = { 't': content, 'nlp': nlp_doc}
+            for nlp_sent in nlp_doc['sentences']:
+                pos_dict = pos.collect_phrases(nlp_sent['tokens'])
+                for entity, ent_dict in pos_dict.items():
+                    nlp_sent[entity] = ent_dict
+            section[i] = {'b': bullet, 't': content, 's': nlp_doc['sentences']}
 
         if self.DEBUG >= 1:
             if self.DEBUG == 1:
-                print(' '.join(['(%s %s)' % (bullet, len(content['t'])) for bullet, content in section]))
+                print(' '.join(['(%s %s)' % (s['b'], len(s['t'])) for s in section]))
             elif self.DEBUG == 2:
-                for bullet, content in section:
-                    print(f"{bullet:20} {len(content)}\n[{content['t']}]")
+                for s in section:
+                    print(f"{s['b']:20} {len(s['t'])}\n[{s['t']}]")
             else:
-                for bullet, content in section:
-                    print(f"{bullet:20} {len(content)}\n\t[{content['t']}]\n\t[{content['nlp']}]")
+                for s in section:
+                    print(f"{s['b']:20} {len(s['t'])}\n\t[{s['t']}]\n\t[{s['sentences']}]")
            
         return section

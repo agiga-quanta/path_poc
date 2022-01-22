@@ -86,12 +86,22 @@ class ProponentExtractor(object):
                 section['place'] = [text.strip()]
 
         assert len(section) >= 4, section
-        section['nlp'] = nlp_doc
+        # section['nlp'] = nlp_doc
 
-        if self.DEBUG >= 1:
-            for k in section.keys():
-                if self.DEBUG == 1 and k == 'nlp':
-                    continue
+        for k in section.keys():
+            if k in ['postcode', 'state_or_province', 'organization', 'person', 'place', 'title']:
+                section[k] = section[k][0]
+            if k == 'location':
+                section[k] = ' '.join(section[k])
+            if k == 'city':
+                section[k] = section[k][1] if len(section[k]) > 1 and 'County' in section[k][0] else section[k][0]
+
+        for k in ['postcode', 'city', 'state_or_province', 'person', 'title', 'place', 'organization']:
+            if k not in section:
+                section[k] = ''
+        
+        for k in section.keys():                
+            if self.DEBUG >= 1:
                 print(f"{k:20} {section[k]}")
 
         return section

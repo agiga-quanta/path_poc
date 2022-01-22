@@ -16,6 +16,7 @@ class HeaderExtractor(object):
     def __init__(self, config):
         self.CLEANER = init_ops(config.get_eval_option('header_extractor', 'cleaner'))
         self.ID_LIST = init_ops(config.get_eval_option('header_extractor', 'id_list'))
+        self.ETX_LIST = init_ops(config.get_eval_option('header_extractor', 'etx_list'))
         self.CROSS = init_ops(config.get_eval_option('header_extractor', 'cross_context'))
         self.FIXER = init_ops(config.get_eval_option('header_extractor', 'fixer'))
         self.VERIFY = init_ops(config.get_eval_option('header_extractor', 'verify'))
@@ -41,6 +42,15 @@ class HeaderExtractor(object):
                     cv.append(ev)
                 match_dict[k].extend(cv)
 
+        for op in self.ETX_LIST:
+            r = op['func'](op, text)
+            if isinstance(r, dict) and r:
+                for k, v in r.items():
+                    if k not in match_dict:
+                        match_dict[k] = [] 
+                    if v not in match_dict[k]:
+                        match_dict[k].append(v)
+
         for op in self.CROSS:
             m_dict, text = op['func'](op, text)
             for k, v in m_dict.items():
@@ -48,20 +58,22 @@ class HeaderExtractor(object):
                     match_dict[k] = []
                 match_dict[k].extend(v)
 
-        if self.DEBUG == 2:
-            for k, v in match_dict.items():
-                print(f"{k:20} {v}")
-
         for k in match_dict.keys():
+            if self.DEBUG == 2:
+                print(f"{k:20} {v}")
             if k in ['URL', 'email']:
                 continue
-            match_dict[k] = Counter(match_dict[k]).most_common(1)[0]
+            match_dict[k] = Counter(match_dict[k]).most_common(1)[0][0]
 
         if self.DEBUG == 3:
             print('ID_LIST -----\n%s\n----- ID_LIST' % text)
 
         assert {'authorization_no', 'dfo_file_no', 'path_no'}.intersection(match_dict.keys()) is not None
         assert all([regex['func'](regex, text) is None for regex in self.VERIFY]), match_dict
+
+        for k in ['authorization_no', 'dfo_file_no', 'path_no', 'date_of_issuance']:
+            if k not in match_dict:
+                match_dict[k] = ''
 
         if self.DEBUG >= 1:
             for k in match_dict.keys():

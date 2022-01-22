@@ -20,6 +20,12 @@ class NLPProcessor(object):
         res = requests.post(self.STANFORD_URL, headers={"Content-Type": "plain/text"}, data=bytes(text, 'utf-8'))
         try:
             r = res.json()
+            if r and 'sentences' in r:
+                for s in r['sentences']:
+                    if not s:
+                        continue
+                    s_tok, e_tok = s['tokens'][0], s['tokens'][-1]
+                    s['c'] = text[s_tok['characterOffsetBegin']:e_tok['characterOffsetEnd']]
             return r
         except decoder.JSONDecodeError as de:
             print(de, res)

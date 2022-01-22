@@ -31,6 +31,8 @@ class SpellChecker(object):
             for idx in range(0, len(tokens)):
 
                 lemma, pos, text = tokens[idx]['lemma'], tokens[idx]['pos'], tokens[idx]['originalText']
+                # tokens[idx]['sw'] = True if lemma in self.stopwords else False
+                    
                 if lemma in self.known_dict:
                     if pos not in self.known_dict[lemma]:
                         self.known_dict[lemma].add(pos)

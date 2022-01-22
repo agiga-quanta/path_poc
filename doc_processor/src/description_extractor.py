@@ -36,7 +36,7 @@ class DescriptionExtractor(object):
             if curr_section:
                 return text[:element_list[curr_section][curr_t]]
 
-    def extract(self, doc_text, nlp, spl, doc_id):
+    def extract(self, doc_text, nlp, spl, pos, doc_id):
         elements = dict()
         text = deepcopy(doc_text)
 
@@ -51,7 +51,7 @@ class DescriptionExtractor(object):
                 r = op['func'](op, text, from_pos)
                 if isinstance(r, dict):
                     # if self.DEBUG == 3:
-                        # print("[%s]\t[%d:%d] [%s]" % (r['k'], r['s'], r['e'], text[r['s']: r['e']]))
+                    # print("[%s]\t[%d:%d] [%s]" % (r['k'], r['s'], r['e'], text[r['s']: r['e']]))
                     attempt[r['k']] = {'s': r['s'], 'e': r['e'], 'k': text[r['s']: r['e']]}
                     items.append(r['k'])
                     from_pos = r['e']
@@ -77,23 +77,29 @@ class DescriptionExtractor(object):
             element['t'] = element['t'].replace('\n', ' ')
             assert 'PARAGRAPH 35(2)(b) FISHERIES ACT AUTHORIZATION' not in element['t'], text
 
+        if self.DEBUG == 1:
+            print(' '.join(['(%s %s %s %s)' % (name, element['s'], element['e'], len(element['t'])) for name, element in elements.items()]))
+        elif self.DEBUG > 1:
+            for name, element in elements.items():
+                s, e, l = element['s'], element['e'], len(element['t'])
+                print(f"{name:20} {s:10} {e:10} {l:10}\n[{element['t']}]")
+
+        section = list()
         for name, element in elements.items():
+            if name.startswith('auth_'):
+                continue
             nlp_doc = nlp.process(element['t'])
+            if 'sentences' not in nlp_doc or not nlp_doc['sentences']:
+                continue
             spl.process(nlp_doc, doc_id)
-            element['nlp'] = nlp_doc
+            for nlp_sent in nlp_doc['sentences']:
+                pos_dict = pos.collect_phrases(nlp_sent['tokens'])
+                for entity, ent_dict in pos_dict.items():
+                    nlp_sent[entity] = ent_dict
 
-
-        if self.DEBUG >= 1:
-            if self.DEBUG == 1:
-                print(' '.join(['(%s %s %s %s)' % (k, v['s'], v['e'], len(v['t'])) for k, v in elements.items()]))
-            elif self.DEBUG == 2:
-                for name, element in elements.items():
-                    s, e, l = element['s'], element['e'], len(element['t'])
-                    print(f"{name:20} {s:10} {e:10} {l:10}\n[{element['t']}]")
-            else:
-                for name, element in elements.items():
-                    s, e, l = element['s'], element['e'], len(element['t'])
-                    print(f"{name:20} {s:10} {e:10} {l:10}")
-                    for ek, ev in element.items():
-                        print(f"\t{ek:30} [{ev}]")
-        return elements
+            assert 'k' in element, '%s %s' % (name, element['t'])
+            section.append({
+                'name': name, 'k': element['k'], 't': element['t'], 's': nlp_doc['sentences']
+            })
+        
+        return section
