@@ -42,6 +42,38 @@ services:
     ports:
       - 9000:9000
 
+  ####################
+  # neo4j:
+  # - Neo4j + APOC + GDS
+  #
+  neo4j:
+    image: neo4j:4.4.3
+    hostname: neo4j
+    container_name: neo4j
+    ports:
+      - 7474:7474
+      - 7473:7473
+      - 7687:7687
+    volumes:
+      - ./neo4j/data:/data
+      - ./data/json:/import
+      - ./neo4j/logs:/logs
+      - ./neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/path_poc
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_dbms_memory_heap_initial__size=2G
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+      - NEO4J_dbms_security_allow__csv__import__from__file__urls=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_jobs_pool_num__threads=4
+      - NEO4J_apoc_jobs_scheduled_num__threads=4
+      # - NEO4J_apoc_spatial_geocode_provider=osm
+      # - NEO4J_apoc_spatial_geocode_osm_throttle=5000
 
 ##############################
 # data processing services
@@ -72,39 +104,21 @@ services:
     hostname: doc_processor
     container_name: doc_processor
     volumes:
+      - ./src:/src
       - ./conf:/conf
       - ./data/xhtml:/xhtml
       - ./data/json:/json
 
+##############################
+# data visualization services
+#
+
   ####################
-  # neo4j:
-  # - Neo4j + APOC + GDS
+  # neodash:
   #
-  neo4j:
-    image: neo4j:4.4.3
-    hostname: neo4j
-    container_name: neo4j
+  neodash:
+    image: nielsdejong/neodash:latest
+    hostname: neodash
+    container_name: neodash
     ports:
-      - 7474:7474
-      - 7473:7473
-      - 7687:7687
-    volumes:
-      - ./neo4j/data:/data
-      - ./neo4j/import:/import
-      - ./neo4j/logs:/logs
-      - ./neo4j/plugins:/plugins
-    environment:
-      - NEO4J_AUTH=neo4j/path_poc
-      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
-      - NEO4J_dbms_memory_heap_initial__size=2G
-      - NEO4J_dbms_memory_heap_max__size=2G
-      - NEO4J_dbms_memory_pagecache_size=1G
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
-      - NEO4J_dbms_security_allow__csv__import__from__file__urls=true
-      - NEO4J_apoc_import_file_enabled=true
-      - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4J_apoc_export_file_enabled=true
-      - NEO4J_apoc_jobs_pool_num__threads=4
-      - NEO4J_apoc_jobs_scheduled_num__threads=4
-      # - NEO4J_apoc_spatial_geocode_provider=osm
-      # - NEO4J_apoc_spatial_geocode_osm_throttle=5000
+      - 8000:80

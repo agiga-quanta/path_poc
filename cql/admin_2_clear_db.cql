@@ -1,7 +1,15 @@
 ////////////////////////////////////////////////////////////////////////
 // Note that this might not work for large size database
 //
-MATCH (a)-[r]->() DELETE a, r;
-MATCH (a) DELETE a;
+CALL apoc.periodic.iterate(
+"
+    MATCH (n)
+    RETURN n
+","
+    DETACH DELETE n;
+",
+{
+    batchSize:1000, iterateList:true, parallel:false
+});
 //
 ////////////////////////////////////////////////////////////////////////

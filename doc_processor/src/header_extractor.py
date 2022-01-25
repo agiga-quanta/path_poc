@@ -10,6 +10,10 @@ __status__ = "Development"
 from collections import Counter
 from regex_process import init_ops
 
+MONTH_MAP = {
+    "JAN": "1", "FEB": "2", "MAR": "3", "APR": "4", "MAY": "5", "JUN": "6",
+    "JUL": "7", "AUG": "8", "SEP": "9", "OCT": "10", "NOV": "11", "DEC": "12",
+}
 
 class HeaderExtractor(object):
 
@@ -74,6 +78,12 @@ class HeaderExtractor(object):
         for k in ['authorization_no', 'dfo_file_no', 'path_no', 'date_of_issuance']:
             if k not in match_dict:
                 match_dict[k] = ''
+            else:
+                if k == 'date_of_issuance':
+                    splits = match_dict[k].split()
+                    match_dict[k] = '%s-%s-%s' % (splits[2], MONTH_MAP[splits[0]], splits[1])
+                else:
+                    match_dict[k] = match_dict[k][match_dict[k].find(':')+1:].strip()
 
         if self.DEBUG >= 1:
             for k in match_dict.keys():
