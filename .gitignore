@@ -3,7 +3,6 @@
 /neo4j/logs
 .DS_Store
 *.xlsx
-*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
