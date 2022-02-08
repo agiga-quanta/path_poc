@@ -55,7 +55,12 @@ RETURN
     SIZE(apoc.convert.fromJsonList(n.dm1_reasons)) AS reasons;
 
 WITH
-    [ '14-HCAA-00258' ] AS path_uid_list
+    [
+        // '14-HCAA-00258',
+        // '17-HCAA-01168',
+        // '14-HCAA-00225',
+        '14-HCAA-01139'
+    ] AS path_uid_list
 MATCH (n:DM1)
 WITH
     apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
@@ -65,83 +70,27 @@ WITH
         WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
 RETURN doc, sentence;
 
+MATCH (n:DM1)
 WITH 
+    apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
+    apoc.convert.fromJsonList(n.dm1_reasons) AS reasons,
     [ 
-        '14-HCAA-00258' 
+        // '14-HCAA-00258',
+        // '17-HCAA-01168',
+        // '14-HCAA-00225',
+        '14-HCA-01139'
     ]
     AS path_uid_list
-    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)
+    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT)
         WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
-WITH doc, sentence 
-    MATCH (sentence)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT)
-WITH doc, sentence, foot_print
-    MATCH (n:DM1)
-WITH doc, sentence, foot_print,
-    apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
-    apoc.convert.fromJsonList(n.dm1_reasons) AS reasons
-    MATCH 
+WITH impacts, reasons, doc, sentence, foot_print
+    MATCH
         (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD),
         (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
     WHERE key_phrase <> reason_phrase
 WITH impacts, reasons, doc, sentence, foot_print, 
-    key_phrase, COLLECT(kword.lemma) AS kwords, reason_phrase, COLLECT(rword.lemma) AS rwords
+    key_phrase, COLLECT(DISTINCT(kword.lemma)) AS kwords, reason_phrase, COLLECT(DISTINCT(rword.lemma)) AS rwords
     WHERE
         ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term)) AND
         ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))
 RETURN doc.uid, sentence.text, foot_print.text, key_phrase.text, kwords, reason_phrase.text, rwords;
-
-MATCH (n:DM1)
-WITH apoc.convert.fromJsonList(n.dm1_impacts) AS impacts, apoc.convert.fromJsonList(n.dm1_reasons) AS reasons, apoc.convert.fromJsonList(n.dm1_path_uid_list) AS path_uid_list, n.dm1_path_section AS path_section, n.dm1_path_not_item AS path_not_item
-    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: path_section}]-(sentence:SENTENCE)
-        WHERE doc.uid IN path_uid_list AND r.item <> path_not_item
-WITH impacts, reasons, doc, sentence 
-    MATCH (sentence)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT),
-    (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD),
-    (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
-WITH impacts, reasons, doc, sentence, foot_print, key_phrase, reason_phrase,
-    COLLECT(kword.lemma) AS kwords, COLLECT(rword.lemma) AS rwords
-    WHERE ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term))
-    AND ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))
-RETURN doc.uid, sentence.text AS sentence, foot_print.text AS foot_print,
-    COLLECT(DISTINCT(key_phrase.text)) AS key_phrases, COLLECT(DISTINCT(reason_phrase.text)) AS reason_phrases;
-
-MATCH (n:DM1)
-WITH apoc.convert.fromJsonList(n.dm1_impacts) AS impacts, apoc.convert.fromJsonList(n.dm1_reasons) AS reasons, apoc.convert.fromJsonList(n.dm1_path_uid_list) AS path_uid_list, n.dm1_path_section AS path_section, n.dm1_path_not_item AS path_not_item
-    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: path_section}]-(sentence:SENTENCE)
-        WHERE doc.uid IN path_uid_list AND r.item <> path_not_item
-WITH impacts, reasons, doc, sentence 
-    MATCH (sentence)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT),
-    (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD),
-    (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
-WITH impacts, reasons, doc, sentence, foot_print, key_phrase, reason_phrase,
-    COLLECT(kword.lemma) AS kwords, COLLECT(rword.lemma) AS rwords
-    WHERE ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term))
-    AND ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))
-RETURN DISTINCT(doc) AS doc;
-
-////////////////////////////////////////////////////////////////////////////////
-
-//{"dm2_doc_uid": "17", "dm_2_doc_section": "c", "dm2_doc_section_item": "5."}
-MERGE (n:DM2)
-    SET 
-        n.dm2_doc_uid = $dm2_doc_uid,
-        n.dm_2_doc_section = $dm_2_doc_section,
-        n.dm2_doc_section_item = $dm2_doc_section_item
-RETURN n.dm2_doc_uid AS uid_starts_with, n.dm_2_doc_section AS path_section, n.dm2_doc_section_item AS item
-
-MATCH (n:DM2)
-WITH n.dm2_doc_uid AS dm2_doc_uid, n.dm_2_doc_section AS dm2_doc_section, n.dm2_doc_section_item AS dm2_doc_section_item
-MATCH (doc:PATH)-[r:HAS_SENTENCE {section: dm2_doc_section}]-(sentence:SENTENCE)
-    WHERE doc.uid STARTS WITH dm2_doc_uid AND r.item STARTS WITH dm2_doc_section_item
-WITH doc, sentence, r.item AS item
-    MATCH (sentence)-[:HAS_NAMED_ENTITY]->(date:NE_DATE)
-RETURN COUNT(DISTINCT(doc.uid));
-
-MATCH (n:DM2)
-WITH n.dm2_doc_uid AS dm2_doc_uid, n.dm_2_doc_section AS dm2_doc_section, n.dm2_doc_section_item AS dm2_doc_section_item
-MATCH (doc:PATH)-[r:HAS_SENTENCE {section: dm2_doc_section}]-(sentence:SENTENCE)
-    WHERE doc.uid STARTS WITH dm2_doc_uid AND r.item STARTS WITH dm2_doc_section_item
-WITH doc, sentence, r.item AS item
-    MATCH (sentence)-[:HAS_NAMED_ENTITY]->(date:NE_DATE)
-WITH doc, item, COLLECT(date.text) AS dates
-RETURN doc.uid AS doc_uid, item, dates ORDER BY doc_uid, item ASC;
