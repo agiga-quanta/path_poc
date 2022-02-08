@@ -44,11 +44,12 @@ WITH
         "causeway",
         "construction"
     ] AS dm1_reasons,
-    "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS nlp_url
+    "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
+    "http://192.168.0.23:7000/stem"  AS nltk_url
 MERGE (n:DM1)
     SET 
-        n.dm1_impacts = apoc.convert.toJson(custom.extract_terms(dm1_impacts, nlp_url)),
-        n.dm1_reasons = apoc.convert.toJson(custom.extract_terms(dm1_reasons, nlp_url))
+        n.dm1_impacts = apoc.convert.toJson(custom.extract_terms(dm1_impacts, stanford_url, nltk_url)),
+        n.dm1_reasons = apoc.convert.toJson(custom.extract_terms(dm1_reasons, stanford_url, nltk_url))
 RETURN
     SIZE(apoc.convert.fromJsonList(n.dm1_impacts)) AS impacts,
     SIZE(apoc.convert.fromJsonList(n.dm1_reasons)) AS reasons;
@@ -78,14 +79,16 @@ WITH doc, sentence, foot_print
 WITH doc, sentence, foot_print,
     apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
     apoc.convert.fromJsonList(n.dm1_reasons) AS reasons
-    MATCH  (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD)
-WITH impacts, reasons, doc, sentence, foot_print, key_phrase, COLLECT(kword.lemma) AS kwords
-    WHERE ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term))
-WITH impacts, reasons, doc, sentence, foot_print, key_phrase, kwords
-    MATCH (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
-WITH impacts, reasons, doc, sentence, foot_print, key_phrase, kwords, reason_phrase, COLLECT(rword.lemma) AS rwords
-    WHERE ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))
-RETURN doc, sentence, foot_print, key_phrase, kwords, reason_phrase, rwords;
+    MATCH 
+        (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD),
+        (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
+    WHERE key_phrase <> reason_phrase
+WITH impacts, reasons, doc, sentence, foot_print, 
+    key_phrase, COLLECT(kword.lemma) AS kwords, reason_phrase, COLLECT(rword.lemma) AS rwords
+    WHERE
+        ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term)) AND
+        ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))
+RETURN doc.uid, sentence.text, foot_print.text, key_phrase.text, kwords, reason_phrase.text, rwords;
 
 MATCH (n:DM1)
 WITH apoc.convert.fromJsonList(n.dm1_impacts) AS impacts, apoc.convert.fromJsonList(n.dm1_reasons) AS reasons, apoc.convert.fromJsonList(n.dm1_path_uid_list) AS path_uid_list, n.dm1_path_section AS path_section, n.dm1_path_not_item AS path_not_item

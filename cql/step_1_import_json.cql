@@ -84,15 +84,16 @@ CREATE CONSTRAINT ON (n:WORD) ASSERT n.lemma IS UNIQUE;
 //
 CALL apoc.custom.asFunction(
     'extract_terms',
-    'WITH REDUCE(s="", e IN $phrases | s + e + ". ") AS payload
-        CALL apoc.load.jsonParams($stanford_url, {method: "POST", contentType: "plain/text"}, payload) 
-            YIELD value
-    WITH CALL apoc.load.jsonParams($nltk_url, {method: "POST", contentType: "application/json"}, value) 
-            YIELD value AS stem_json
-    RETURN REDUCE(l = [], s IN value.sentences | l + [[e IN REVERSE(TAIL(REVERSE(s.tokens))) WHERE SIZE(e.s) > 2 | e.s]]) 
+    'WITH REDUCE(s="", e IN $phrases | s + e + ". ") AS terms
+        CALL apoc.load.jsonParams($stanford_url, {method: "POST", contentType: "plain/text"}, terms) 
+            YIELD value AS terms_nlp
+    WITH terms_nlp 
+        CALL apoc.load.jsonParams($nltk_url, {method: "POST", contentType: "application/json"}, apoc.convert.toJson(terms_nlp)) 
+            YIELD value AS terms_stem
+    RETURN REDUCE(l = [], s IN terms_stem.sentences | l + [[e IN REVERSE(TAIL(REVERSE(s.tokens))) WHERE SIZE(e.s) > 2 | e.s]]) 
         AS list_of_terms',
     'LIST OF LIST OF STRING',
-    [['phrases', 'LIST OF STRING'], ['stanford_url', 'STRING']],
+    [['phrases', 'LIST OF STRING'], ['stanford_url', 'STRING'], ['nltk_url', 'STRING']],
     TRUE,
     'Natural language process a list of terms into list of lemmatized words'
 );
@@ -201,7 +202,7 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     key_phrase.original = kp.o
             FOREACH (w IN kp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.l)})
+                MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
@@ -213,7 +214,7 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     foot_print.original = fp.o
             FOREACH (w IN fp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.l)})
+                MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
@@ -243,7 +244,7 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     key_phrase.original = kp.o
             FOREACH (w IN kp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.l)})
+                MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
@@ -255,7 +256,7 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     foot_print.original = fp.o
             FOREACH (w IN fp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.l)})
+                MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)

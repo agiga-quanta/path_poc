@@ -1,4 +1,4 @@
-FROM alpine:3.8 as builder
+FROM alpine:3.15 as builder
 
 RUN apk update && \
     apk add git wget openjdk8-jre-base py2-pip py2-curl && \
@@ -27,7 +27,7 @@ RUN wget $(grepurl -r 'english.*jar$' -a http://stanfordnlp.github.io/CoreNLP | 
 
 
 # only keep the things we need to run and test CoreNLP
-FROM alpine:3.8
+FROM alpine:3.15
 
 RUN apk update && apk add openjdk8-jre-base py3-pip && \
     pip3 install pytest pexpect requests
