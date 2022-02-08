@@ -87,6 +87,8 @@ CALL apoc.custom.asFunction(
     'WITH REDUCE(s="", e IN $phrases | s + e + ". ") AS payload
         CALL apoc.load.jsonParams($stanford_url, {method: "POST", contentType: "plain/text"}, payload) 
             YIELD value
+    WITH CALL apoc.load.jsonParams($nltk_url, {method: "POST", contentType: "application/json"}, value) 
+            YIELD value AS stem_json
     RETURN REDUCE(l = [], s IN value.sentences | l + [[e IN REVERSE(TAIL(REVERSE(s.tokens))) WHERE SIZE(e.s) > 2 | e.s]]) 
         AS list_of_terms',
     'LIST OF LIST OF STRING',

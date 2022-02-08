@@ -26,6 +26,8 @@ services:
     image: apache/tika:2.1.0
     hostname: tika
     container_name: tika
+    networks:
+      - backend
     ports:
       - 9998:9998
 
@@ -37,6 +39,8 @@ services:
       context: ./nltk_nlp
       dockerfile: Dockerfile
     image: agigaquanta/nltk_nlp:1.0.0
+    networks:
+      - backend
     ports: 
       - 7000:6543
 
@@ -50,6 +54,8 @@ services:
     image: agigaquanta/stanford_nlp:1.0.0
     hostname: stanford_nlp
     container_name: stanford_nlp
+    networks:
+      - backend
     ports:
       - 9000:9000
 
@@ -61,6 +67,8 @@ services:
     image: neo4j:4.4.3
     hostname: neo4j
     container_name: neo4j
+    networks:
+      - backend
     ports:
       - 7474:7474
       - 7473:7473
@@ -100,6 +108,8 @@ services:
     image: agigaquanta/pdf_extractor:1.0.0
     hostname: pdf_extractor
     container_name: pdf_extractor
+    networks:
+      - backend
     volumes:
       - ./data/pdf:/pdf
       - ./data/xhtml:/xhtml
@@ -114,6 +124,8 @@ services:
     image: agigaquanta/doc_processor:1.0.0
     hostname: doc_processor
     container_name: doc_processor
+    networks:
+      - backend
     volumes:
       - ./src:/src
       - ./conf:/conf
@@ -131,5 +143,16 @@ services:
     image: nielsdejong/neodash:latest
     hostname: neodash
     container_name: neodash
+    networks:
+      - backend
     ports:
       - 8000:80
+
+################################################################################
+#
+# networks
+#
+################################################################################
+networks:
+  backend:
+    name: backend
