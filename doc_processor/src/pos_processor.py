@@ -8,6 +8,7 @@ __status__ = "Development"
 
 
 import re
+from nltk.stem.snowball import EnglishStemmer
 
 
 class POSProcessor(object):
@@ -18,6 +19,7 @@ class POSProcessor(object):
         for extractor in self.EXTRACTORS:
             extractor['grammar'] = re.compile(extractor['grammar'])
             extractor['collect'] = re.compile(extractor['collect'])
+        self.stemmer = EnglishStemmer()
 
     def collect_phrases(self, tok_list, min_len_word=3):
         tok_dict = { t['index']: t for t in tok_list }
@@ -38,6 +40,7 @@ class POSProcessor(object):
                 # Collect matched pair (word index, xpos_tag) based on `collect`
                 words = [ { 
                     'l': tok_dict[int(idx)]['lemma'],
+                    's': self.stemmer.stem(tok_dict[int(idx)]['lemma']),
                     'o': tok_dict[int(idx)]['originalText'],
                     'p': pos_tag,
                 } for idx, pos_tag in collect.findall(id_xpos_list[s:e]) ]

@@ -42,7 +42,7 @@
           }
         },
         {
-          "title": "",
+          "title": "Meta Graph",
           "query": "CALL apoc.meta.graph()\n\n\n",
           "width": "12",
           "type": "graph",

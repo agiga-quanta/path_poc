@@ -1,0 +1,341 @@
+{
+    "sentences":[
+       {
+          "index":0,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"infilling",
+                "originalText":"infilling",
+                "lemma":"infil",
+                "characterOffsetBegin":0,
+                "characterOffsetEnd":9,
+                "pos":"VBG",
+                "ner":"O",
+                "before":"",
+                "after":"",
+                "s":"infil"
+             },
+             {
+                "index":2,
+                "word":".",
+                "originalText":".",
+                "lemma":".",
+                "characterOffsetBegin":9,
+                "characterOffsetEnd":10,
+                "pos":".",
+                "ner":"O",
+                "before":"",
+                "after":" ",
+                "s":"."
+             }
+          ]
+       },
+       {
+          "index":1,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"destruction",
+                "originalText":"destruction",
+                "lemma":"destruction",
+                "characterOffsetBegin":11,
+                "characterOffsetEnd":22,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":"",
+                "s":"destruct"
+             },
+             {
+                "index":2,
+                "word":".",
+                "originalText":".",
+                "lemma":".",
+                "characterOffsetBegin":22,
+                "characterOffsetEnd":23,
+                "pos":".",
+                "ner":"O",
+                "before":"",
+                "after":" ",
+                "s":"."
+             }
+          ]
+       },
+       {
+          "index":2,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"permanent",
+                "originalText":"permanent",
+                "lemma":"permanent",
+                "characterOffsetBegin":24,
+                "characterOffsetEnd":33,
+                "pos":"JJ",
+                "ner":"O",
+                "before":" ",
+                "after":" ",
+                "s":"perman"
+             },
+             {
+                "index":2,
+                "word":"alteration",
+                "originalText":"alteration",
+                "lemma":"alteration",
+                "characterOffsetBegin":34,
+                "characterOffsetEnd":44,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":"",
+                "s":"alter"
+             },
+             {
+                "index":3,
+                "word":".",
+                "originalText":".",
+                "lemma":".",
+                "characterOffsetBegin":44,
+                "characterOffsetEnd":45,
+                "pos":".",
+                "ner":"O",
+                "before":"",
+                "after":" ",
+                "s":"."
+             }
+          ]
+       },
+       {
+          "index":3,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"harmful",
+                "originalText":"harmful",
+                "lemma":"harmful",
+                "characterOffsetBegin":46,
+                "characterOffsetEnd":53,
+                "pos":"JJ",
+                "ner":"O",
+                "before":" ",
+                "after":" ",
+                "s":"harm"
+             },
+             {
+                "index":2,
+                "word":"alteration",
+                "originalText":"alteration",
+                "lemma":"alteration",
+                "characterOffsetBegin":54,
+                "characterOffsetEnd":64,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":"",
+                "s":"alter"
+             },
+             {
+                "index":3,
+                "word":".",
+                "originalText":".",
+                "lemma":".",
+                "characterOffsetBegin":64,
+                "characterOffsetEnd":65,
+                "pos":".",
+                "ner":"O",
+                "before":"",
+                "after":" ",
+                "s":"."
+             }
+          ]
+       },
+       {
+          "index":4,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"disruption",
+                "originalText":"disruption",
+                "lemma":"disruption",
+                "characterOffsetBegin":66,
+                "characterOffsetEnd":76,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":"",
+                "s":"disrupt"
+             },
+             {
+                "index":2,
+                "word":".",
+                "originalText":".",
+                "lemma":".",
+                "characterOffsetBegin":76,
+                "characterOffsetEnd":77,
+                "pos":".",
+                "ner":"O",
+                "before":"",
+                "after":" ",
+                "s":"."
+             }
+          ]
+       },
+       {
+          "index":5,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"death",
+                "originalText":"death",
+                "lemma":"death",
+                "characterOffsetBegin":78,
+                "characterOffsetEnd":83,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":" ",
+                "s":"death"
+             },
+             {
+                "index":2,
+                "word":"of",
+                "originalText":"of",
+                "lemma":"of",
+                "characterOffsetBegin":84,
+                "characterOffsetEnd":86,
+                "pos":"IN",
+                "ner":"O",
+                "before":" ",
+                "after":" ",
+                "s":"of"
+             },
+             {
+                "index":3,
+                "word":"fish",
+                "originalText":"fish",
+                "lemma":"fish",
+                "characterOffsetBegin":87,
+                "characterOffsetEnd":91,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":"",
+                "s":"fish"
+             },
+             {
+                "index":4,
+                "word":".",
+                "originalText":".",
+                "lemma":".",
+                "characterOffsetBegin":91,
+                "characterOffsetEnd":92,
+                "pos":".",
+                "ner":"O",
+                "before":"",
+                "after":" ",
+                "s":"."
+             }
+          ]
+       },
+       {
+          "index":6,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"temporary",
+                "originalText":"temporary",
+                "lemma":"temporary",
+                "characterOffsetBegin":93,
+                "characterOffsetEnd":102,
+                "pos":"JJ",
+                "ner":"O",
+                "before":" ",
+                "after":" ",
+                "s":"temporari"
+             },
+             {
+                "index":2,
+                "word":"alteration",
+                "originalText":"alteration",
+                "lemma":"alteration",
+                "characterOffsetBegin":103,
+                "characterOffsetEnd":113,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":"",
+                "s":"alter"
+             },
+             {
+                "index":3,
+                "word":".",
+                "originalText":".",
+                "lemma":".",
+                "characterOffsetBegin":113,
+                "characterOffsetEnd":114,
+                "pos":".",
+                "ner":"O",
+                "before":"",
+                "after":" ",
+                "s":"."
+             }
+          ]
+       },
+       {
+          "index":7,
+          "entitymentions":[
+             
+          ],
+          "tokens":[
+             {
+                "index":1,
+                "word":"permanent",
+                "originalText":"permanent",
+                "lemma":"permanent",
+                "characterOffsetBegin":115,
+                "characterOffsetEnd":124,
+                "pos":"JJ",
+                "ner":"O",
+                "before":" ",
+                "after":" ",
+                "s":"perman"
+             },
+             {
+                "index":2,
+                "word":"destruction",
+                "originalText":"destruction",
+                "lemma":"destruction",
+                "characterOffsetBegin":125,
+                "characterOffsetEnd":136,
+                "pos":"NN",
+                "ner":"O",
+                "before":" ",
+                "after":"",
+                "s":"destruct"
+             }
+          ]
+       }
+    ]
+ }

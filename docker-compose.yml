@@ -30,6 +30,17 @@ services:
       - 9998:9998
 
   ####################
+  # nltk_nlp:
+  #
+  nltk_nlp:
+    build:
+      context: ./nltk_nlp
+      dockerfile: Dockerfile
+    image: agigaquanta/nltk_nlp:1.0.0
+    ports: 
+      - 7000:6543
+
+  ####################
   # stanford_nlp:
   #
   stanford_nlp:
