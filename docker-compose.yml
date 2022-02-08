@@ -39,6 +39,8 @@ services:
       context: ./nltk_nlp
       dockerfile: Dockerfile
     image: agigaquanta/nltk_nlp:1.0.0
+    hostname: nltk_nlp
+    container_name: nltk_nlp
     networks:
       - backend
     ports: 
