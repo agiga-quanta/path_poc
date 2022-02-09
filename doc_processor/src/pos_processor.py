@@ -43,6 +43,7 @@ class POSProcessor(object):
                     's': self.stemmer.stem(tok_dict[int(idx)]['lemma']),
                     'o': tok_dict[int(idx)]['originalText'],
                     'p': pos_tag,
+                    'i': float(idx),
                 } for idx, pos_tag in collect.findall(id_xpos_list[s:e]) ]
 
                 # Create new phrase
@@ -52,6 +53,7 @@ class POSProcessor(object):
                         't': ' '.join([w['l'] for w in words]),
                         'o': ' '.join([w['o'] for w in words]),
                         'w': words,
+                        'i': sum([w['i'] for w in words])/len(words)
                     })
             
         return pos_dict

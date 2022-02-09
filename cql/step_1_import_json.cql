@@ -200,11 +200,13 @@ CALL apoc.periodic.iterate(
         FOREACH (kp IN elem.KP |
             MERGE (key_phrase:KEY_PHRASE {text: kp.t})
                 ON CREATE SET
-                    key_phrase.original = kp.o
+                    key_phrase.original = kp.o,
+                    key_phrase.mean_index = kp.i
             FOREACH (w IN kp.w |
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.mean_index = w.i
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
@@ -212,11 +214,13 @@ CALL apoc.periodic.iterate(
         FOREACH (fp IN elem.FP |
             MERGE (foot_print:FOOT_PRINT {text: fp.t})
                 ON CREATE SET
-                    foot_print.original = fp.o
+                    foot_print.original = fp.o,
+                    foot_print.mean_index = fp.i
             FOREACH (w IN fp.w |
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.mean_index = w.i
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
@@ -242,11 +246,13 @@ CALL apoc.periodic.iterate(
         FOREACH (kp IN elem.KP |
             MERGE (key_phrase:KEY_PHRASE {text: kp.t})
                 ON CREATE SET
-                    key_phrase.original = kp.o
+                    key_phrase.original = kp.o,
+                    key_phrase.mean_index = kp.i
             FOREACH (w IN kp.w |
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.mean_index = w.i
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
@@ -254,11 +260,13 @@ CALL apoc.periodic.iterate(
         FOREACH (fp IN elem.FP |
             MERGE (foot_print:FOOT_PRINT {text: fp.t})
                 ON CREATE SET
-                    foot_print.original = fp.o
+                    foot_print.original = fp.o,
+                    foot_print.mean_index = fp.i
             FOREACH (w IN fp.w |
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.mean_index = w.i
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
