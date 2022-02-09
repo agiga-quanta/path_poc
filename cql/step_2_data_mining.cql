@@ -118,6 +118,7 @@ WITH impact_terms, reason_terms, doc, sentence, foot_print
     MATCH
         (sentence)-[:HAS_KEY_PHRASE]->(impact_phrase:KEY_PHRASE)-[:HAS_WORD]->(iword:WORD),
         (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
+    WHERE impact_phrase <> reason_phrase
 WITH impact_terms, reason_terms, doc, sentence, foot_print, 
     impact_phrase, COLLECT(DISTINCT(iword.stem)) AS iwords, 
     reason_phrase, COLLECT(DISTINCT(rword.stem)) AS rwords
