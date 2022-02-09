@@ -2,7 +2,7 @@ WITH
     [ "destruction", "death of fish" ] AS terms,
     "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
     "http://nltk_nlp:6543/stem"  AS nltk_url
-RETURN custom.extract_terms(dm1_impacts, stanford_url, nltk_url);
+RETURN custom.extract_terms(terms, stanford_url, nltk_url);
 
 WITH
     [
