@@ -206,7 +206,7 @@ CALL apoc.periodic.iterate(
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o,
-                        word.mean_index = w.i
+                        word.index = w.i
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
@@ -220,7 +220,7 @@ CALL apoc.periodic.iterate(
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o,
-                        word.mean_index = w.i
+                        word.index = w.i
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
@@ -252,7 +252,7 @@ CALL apoc.periodic.iterate(
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o,
-                        word.mean_index = w.i
+                        word.index = w.i
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
@@ -266,7 +266,7 @@ CALL apoc.periodic.iterate(
                 MERGE (word:WORD {lemma: TOLOWER(w.s)})
                     ON CREATE SET
                         word.original = w.o,
-                        word.mean_index = w.i
+                        word.index = w.i
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
