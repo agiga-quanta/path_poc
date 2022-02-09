@@ -43,10 +43,8 @@ CREATE INDEX file_name_content FOR (n:SENTENCE) ON (n.file_name, n.text);
 CREATE INDEX path_sentence FOR ()-[r:HAS_SENTENCE]-() ON (r.section, r.item);
 //
 CREATE CONSTRAINT ON (n:KEY_PHRASE) ASSERT n.text IS UNIQUE;
-CREATE INDEX sentence_key_phrase FOR ()-[r:HAS_KEY_PHRASE]-() ON (r.mean_index);
 //
 CREATE CONSTRAINT ON (n:FOOT_PRINT) ASSERT n.text IS UNIQUE;
-CREATE INDEX sentence_foot_print FOR ()-[r:HAS_FOOT_PRINT]-() ON (r.mean_index);
 //
 CREATE INDEX ON :NAMED_ENTITY(text);
 //
