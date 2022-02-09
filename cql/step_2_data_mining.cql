@@ -20,6 +20,8 @@ WITH
         "destruction",
         "disruption", 
         "harmful alteration", 
+        "kill",
+        "loss",
         "permanent alteration", 
         "permanent destruction",
         "temporary alteration"
@@ -138,8 +140,19 @@ WITH impact_terms, reason_terms, doc, sentence, foot_print,
         CASE ANY(phrase IN reason_phrases WHERE apoc.coll.containsAll(phrase, term))
             WHEN TRUE THEN r + [term] ELSE r END
     ) AS reason_phrases
+ WITH
+    [
+        'NE_LOCATION', 
+        'NE_ORGANIZATION', 
+        'NE_PERSON', 
+        'NE_TITLE'
+    ] AS entity_types,
+    doc, sentence, foot_print, impact_phrases, reason_phrases
+    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity)
+        WHERE SIZE(apoc.coll.intersection(entity_types, LABELS(entity))) > 0
 RETURN 
     doc.uid AS path_uid, sentence.text AS sentence,
-    foot_print.text AS foot_prints, impact_phrases, reason_phrases; 
+    foot_print.text AS foot_prints, impact_phrases, reason_phrases,
+    COLLECT(DISTINCT(entity.text)) AS named_entities;
 //
 ////////////////////////////////////////////////////////////////////////
