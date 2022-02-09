@@ -92,7 +92,7 @@ WITH impacts, reasons, doc, sentence, foot_print
         (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
     WHERE key_phrase <> reason_phrase
 WITH impacts, reasons, doc, sentence, foot_print, 
-    key_phrase, COLLECT(DISTINCT(kword.lemma)) AS kwords, reason_phrase, COLLECT(DISTINCT(rword.lemma)) AS rwords
+    key_phrase, COLLECT(DISTINCT(kword.stem)) AS kwords, reason_phrase, COLLECT(DISTINCT(rword.stem)) AS rwords
     WHERE
         ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term)) AND
         ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))

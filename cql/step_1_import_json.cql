@@ -75,8 +75,8 @@ CREATE CONSTRAINT ON (n:NE_URL) ASSERT n.text IS UNIQUE;
 //
 // Lemmatized word
 //
-CREATE CONSTRAINT ON (n:WORD) ASSERT n.lemma IS UNIQUE;
-// - l is the lemma form of the text, it is unique and indexed
+CREATE CONSTRAINT ON (n:WORD) ASSERT n.stem IS UNIQUE;
+// - l is the stem form of the text, it is unique and indexed
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -202,9 +202,10 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     key_phrase.original = kp.o
             FOREACH (w IN kp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.s)})
+                MERGE (word:WORD {stem: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.lemma = w.l
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
@@ -214,9 +215,10 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     foot_print.original = fp.o
             FOREACH (w IN fp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.s)})
+                MERGE (word:WORD {stem: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.lemma = w.l
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
@@ -244,9 +246,10 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     key_phrase.original = kp.o
             FOREACH (w IN kp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.s)})
+                MERGE (word:WORD {stem: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.lemma = w.l
                 MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
@@ -256,9 +259,10 @@ CALL apoc.periodic.iterate(
                 ON CREATE SET
                     foot_print.original = fp.o
             FOREACH (w IN fp.w |
-                MERGE (word:WORD {lemma: TOLOWER(w.s)})
+                MERGE (word:WORD {stem: TOLOWER(w.s)})
                     ON CREATE SET
-                        word.original = w.o
+                        word.original = w.o,
+                        word.lemma = w.l
                 MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
             )
             MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
