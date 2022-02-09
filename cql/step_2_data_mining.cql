@@ -16,49 +16,50 @@ RETURN custom.extract_terms(terms, stanford_url, nltk_url);
 //
 WITH
     [
-        "destruction",
-        "permanent alteration", 
-        "harmful alteration", 
-        "disruption", 
         "death of fish", 
-        "temporary alteration", 
-        "permanent destruction"
+        "destruction",
+        "disruption", 
+        "harmful alteration", 
+        "permanent alteration", 
+        "permanent destruction",
+        "temporary alteration"
     ] AS dm1_impacts,
     [
-        "impingement",
-        "entrainment",
-        "infilling",
-        "dredging",
-        "rip rap",
-        "riprap",
-        "re-sloping",
-        "piles", 
-        "realignment",
-        "culvert",
-        "rock fill",
-        "fill",
-        "pier",
-        "instream pier",
-        "in-stream pier",
         "abutment",
-        "berms",
         "armouring",
-        "concrete pipe",
-        "extension",
+        "bank protection",
+        "berms",
+        "causeway",
+        "changes to flow",
+        "channel deepening",
         "channel realignment",
-        "temporary infilling",
         "coffer dam",
         "cofferdam",
-        "placement of sand",
-        "spur",
-        "bank protection",
-        "hydraulic impact",
+        "concrete pipe",
+        "construction",
+        "culvert",
         "dewatering",
-        "changes to flow",
+        "dredging",
+        "entrainment",
+        "extension",
+        "fill",
+        "hydraulic impact",
+        "impingement",
+        "in-stream pier",
         "incidental",
-        "channel deepening",
-        "causeway",
-        "construction"
+        "infilling",
+        "instream pier",
+        "pier",
+        "piles", 
+        "placement of sand",
+        "re-sloping",
+        "realignment",
+        "rip rap",
+        "riprap",
+        "rock fill",
+        "shoreline protection",
+        "spur",
+        "temporary infilling"
     ] AS dm1_reasons,
     "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
     "http://nltk_nlp:6543/stem"  AS nltk_url
@@ -79,10 +80,10 @@ RETURN
 //
 WITH
     [
-        '14-HCAA-00258',
-        '17-HCAA-01168',
         '14-HCAA-00225',
-        '14-HCAA-01139'
+        '14-HCAA-01139',
+        '14-HCAA-00258',
+        '17-HCAA-01168'
     ] AS path_uid_list
 MATCH (n:DM1)
 WITH
@@ -107,10 +108,10 @@ WITH
     apoc.convert.fromJsonList(n.dm1_impacts) AS impact_terms,
     apoc.convert.fromJsonList(n.dm1_reasons) AS reason_terms,
     [ 
-        '14-HCAA-00258',
-        '17-HCAA-01168',
         '14-HCAA-00225',
-        '14-HCAA-01139'
+        '14-HCAA-01139',
+        '14-HCAA-00258',
+        '17-HCAA-01168'
     ] AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT)
         WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
