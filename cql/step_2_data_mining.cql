@@ -83,8 +83,7 @@ WITH
         // '17-HCAA-01168',
         // '14-HCAA-00225',
         '14-HCAA-01139'
-    ]
-    AS path_uid_list
+    ] AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT)
         WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
 WITH impacts, reasons, doc, sentence, foot_print
@@ -98,3 +97,43 @@ WITH impacts, reasons, doc, sentence, foot_print,
         ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term)) AND
         ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))
 RETURN doc.uid, sentence.text, foot_print.text, key_phrase.text, kwords, reason_phrase.text, rwords;
+
+MATCH (n:DM1)
+WITH 
+    apoc.convert.fromJsonList(n.dm1_impacts) AS impact_terms,
+    apoc.convert.fromJsonList(n.dm1_reasons) AS reason_terms,
+    [ 
+        '14-HCAA-00258',
+        '17-HCAA-01168',
+        '14-HCAA-00225',
+        '14-HCAA-01139'
+    ] AS path_uid_list
+    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT)
+        WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
+WITH impact_terms, reason_terms, doc, sentence, foot_print
+    MATCH (sentence)-[:HAS_KEY_PHRASE]->(impact_phrase:KEY_PHRASE)-[:HAS_WORD]->(iword:WORD)
+WITH impact_terms, reason_terms, doc, sentence, foot_print, impact_phrase, COLLECT(DISTINCT(iword.lemma)) AS iwords
+    WHERE ANY(term IN impact_terms WHERE apoc.coll.containsAll(iwords, term))
+WITH reason_terms, doc, sentence, foot_print, COLLECT(DISTINCT([impact_phrase, iwords])) AS impact_collection
+WITH reason_terms, doc, sentence, foot_print, 
+    REDUCE(r = [0, 0], e IN impact_collection | 
+        CASE (r[0] = 0) OR (r[0] > ABS(foot_print.mean_index - e[0].mean_index))
+            WHEN TRUE THEN [ABS(foot_print.mean_index - e[0].mean_index), e[0], e[1]] 
+            ELSE r END
+    ) AS impact_phrase_words
+WITH reason_terms, doc, sentence, foot_print, impact_phrase_words[1] AS impact_phrase, impact_phrase_words[2] AS iwords
+    MATCH (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
+        WHERE reason_phrase <> impact_phrase
+WITH reason_terms, doc, sentence, foot_print, impact_phrase, iwords, reason_phrase, COLLECT(DISTINCT(rword.lemma)) AS rwords
+    WHERE ANY(term IN reason_terms WHERE apoc.coll.containsAll(rwords, term))
+WITH doc, sentence, foot_print, impact_phrase, iwords, COLLECT(DISTINCT([reason_phrase, rwords])) AS reason_collection
+WITH doc, sentence, foot_print, impact_phrase, iwords, 
+    REDUCE(r = [0, 0], e IN reason_collection | 
+        CASE (r[0] = 0) OR (r[0] > ABS(foot_print.mean_index - e[0].mean_index))
+            WHEN TRUE THEN [ABS(foot_print.mean_index - e[0].mean_index), e[0], e[1]] 
+            ELSE r END
+    ) AS reason_phrase_words
+WITH doc, sentence, foot_print, impact_phrase, iwords, reason_phrase_words[1] AS reason_phrase, reason_phrase_words[2] AS rwords
+RETURN doc.uid, foot_print.text, foot_print.mean_index AS foot_print_index, 
+    TYPE(impact_phrase) AS impact_phrase, iwords AS impact_words, 
+    reason_phrase AS reason, rwords AS reason_words, sentence.text AS sentence;
