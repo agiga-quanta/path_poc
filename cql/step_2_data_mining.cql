@@ -121,16 +121,25 @@ WITH impact_terms, reason_terms, doc, sentence, foot_print
         (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
     WHERE impact_phrase <> reason_phrase
 WITH impact_terms, reason_terms, doc, sentence, foot_print, 
-    impact_phrase, COLLECT(DISTINCT(iword.stem)) AS iwords, 
-    reason_phrase, COLLECT(DISTINCT(rword.stem)) AS rwords
+    COLLECT(DISTINCT(iword.stem)) AS iwords, 
+     COLLECT(DISTINCT(rword.stem)) AS rwords
     WHERE
         ANY(term IN impact_terms WHERE apoc.coll.containsAll(iwords, term)) AND
         ANY(term IN reason_terms WHERE apoc.coll.containsAll(rwords, term))
+WITH impact_terms, reason_terms, doc, sentence, foot_print, 
+    COLLECT(DISTINCT(iwords)) AS impact_phrases,
+    COLLECT(DISTINCT(rwords)) AS reason_phrases
+WITH impact_terms, reason_terms, doc, sentence, foot_print, 
+    REDUCE(r = [], term IN impact_terms | 
+        CASE ANY(phrase IN impact_phrases WHERE apoc.coll.containsAll(phrase, term))
+            WHEN TRUE THEN r + [term] ELSE r END
+    ) AS impact_phrases,
+    REDUCE(r = [], term IN reason_terms | 
+        CASE ANY(phrase IN reason_phrases WHERE apoc.coll.containsAll(phrase, term))
+            WHEN TRUE THEN r + [term] ELSE r END
+    ) AS reason_phrases
 RETURN 
-    doc.uid AS path_uid, 
-    sentence.text AS sentence,
-    COLLECT(DISTINCT(foot_print.text)) AS foot_prints,
-    COLLECT(DISTINCT(impact_phrase.text)) AS impact_phrases, 
-    COLLECT(DISTINCT(reason_phrase.text)) AS reason_phrases; 
+    doc.uid AS path_uid, sentence.text AS sentence,
+    foot_print.text AS foot_prints, impact_phrases, reason_phrases; 
 //
 ////////////////////////////////////////////////////////////////////////
