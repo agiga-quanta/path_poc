@@ -1,4 +1,8 @@
-// {"dm1_impacts": ["permanent alteration", "harmful alteration", "disruption", "death of fish", "temporary alteration", "permanent destruction"],  "dm1_reasons": ["dredging", "rip rap", "riprap", "re-sloping", "piles",  "realignment",  "culvert", "rock fill", "fill", "pier", "instream pier", "in-stream pier", "abutment", "berms", "armouring", "concrete pipe", "extension", "channel realignment", "temporary infilling", "coffer dam", "cofferdam", "placement of sand", "spur", "bank protection", "hydraulic impact", "dewatering", "changes to flow", "incidental", "channel deepening", "causeway", "construction"], "dm1_path_uid_list": ["17-HCAA-01501", "17-HCAA-01357", "17-HCAA-01169", "16-HCAA-00219", "17-HCAA-00176", "15-HCAA-01305", "14-HCAA-00498", "16-HCAA-00582", "17-HCAA-00086", "17-HCAA-00033", "18-HCAA-01357", "17-HCAA-01438", "17-HCAA-00066", "17-HCAA-00058", "17-HCAA-00009", "16-HCAA-01754", "16-HCAA-01734", "16-HCAA-01736", "16-HCAA-01612", "16-HCAA-01721", "17-HCAA-01168", "17-HCAA-01046", "14-HCAA-01999", "14-HCAA-01998", "14-HCAA-00904", "14-HCAA-00932", "14-HCAA-00902", "14-HCAA-00292", "17-HCAA-00985", "17-HCAA-01087", "17-HCAA-00808", "17-HCAA-00940", "17-HCAA-00961", "17-HCAA-00963", "15-HCAA-01266", "18-HCAA-01381", "18-HCAA-01379", "18-HCAA-01287", "18-HCAA-01235", "18-HCAA-00950", "18-HCAA-00808", "18-HCAA-00852"], "dm1_path_section": "d", "dm1_path_not_item": "proj", "nlp_url": "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"}
+WITH 
+    [ "destruction", "death of fish" ] AS terms,
+    "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
+    "http://nltk_nlp:6543/stem"  AS nltk_url
+RETURN custom.extract_terms(dm1_impacts, stanford_url, nltk_url);
 
 WITH
     [
@@ -45,7 +49,7 @@ WITH
         "construction"
     ] AS dm1_reasons,
     "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
-    "http://192.168.0.23:7000/stem"  AS nltk_url
+    "http://nltk_nlp:6543/stem"  AS nltk_url
 MERGE (n:DM1)
     SET 
         n.dm1_impacts = apoc.convert.toJson(custom.extract_terms(dm1_impacts, stanford_url, nltk_url)),
@@ -78,7 +82,7 @@ WITH
         // '14-HCAA-00258',
         // '17-HCAA-01168',
         // '14-HCAA-00225',
-        '14-HCA-01139'
+        '14-HCAA-01139'
     ]
     AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT)
