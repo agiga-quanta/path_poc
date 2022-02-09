@@ -21,7 +21,7 @@ class POSProcessor(object):
             extractor['collect'] = re.compile(extractor['collect'])
         self.stemmer = EnglishStemmer()
 
-    def collect_phrases(self, tok_list, min_len_word=3):
+    def collect_phrases(self, tok_list, min_len_word=2):
         tok_dict = { t['index']: t for t in tok_list }
         pos_dict = dict()
         id_xpos_list = ' '.join('%s_%s' % (t['index'], t['pos']) for t in tok_list)
