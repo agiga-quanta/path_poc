@@ -123,22 +123,21 @@ WITH impact_terms, reason_terms, doc, sentence, foot_print
         (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
     WHERE impact_phrase <> reason_phrase
 WITH impact_terms, reason_terms, doc, sentence, foot_print, 
-    COLLECT(DISTINCT(iword.stem)) AS iwords, 
-     COLLECT(DISTINCT(rword.stem)) AS rwords
+    COLLECT(DISTINCT(iword.stem)) AS iwords, COLLECT(DISTINCT(rword.stem)) AS rwords
     WHERE
-        ANY(term IN impact_terms WHERE apoc.coll.containsAll(iwords, term)) AND
-        ANY(term IN reason_terms WHERE apoc.coll.containsAll(rwords, term))
+        ANY(term IN impact_terms WHERE apoc.coll.containsAll(iwords, [e IN term | e[0]])) AND
+        ANY(term IN reason_terms WHERE apoc.coll.containsAll(rwords, [e IN term | e[0]]))
 WITH impact_terms, reason_terms, doc, sentence, foot_print, 
     COLLECT(DISTINCT(iwords)) AS impact_phrases,
     COLLECT(DISTINCT(rwords)) AS reason_phrases
 WITH impact_terms, reason_terms, doc, sentence, foot_print, 
     REDUCE(r = [], term IN impact_terms | 
-        CASE ANY(phrase IN impact_phrases WHERE apoc.coll.containsAll(phrase, term))
-            WHEN TRUE THEN r + [term] ELSE r END
+        CASE ANY(phrase IN impact_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))
+            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END
     ) AS impact_phrases,
     REDUCE(r = [], term IN reason_terms | 
-        CASE ANY(phrase IN reason_phrases WHERE apoc.coll.containsAll(phrase, term))
-            WHEN TRUE THEN r + [term] ELSE r END
+        CASE ANY(phrase IN reason_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))
+            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END
     ) AS reason_phrases
  WITH
     [
@@ -150,9 +149,14 @@ WITH impact_terms, reason_terms, doc, sentence, foot_print,
     doc, sentence, foot_print, impact_phrases, reason_phrases
     OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity)
         WHERE SIZE(apoc.coll.intersection(entity_types, LABELS(entity))) > 0
-RETURN 
-    doc.uid AS path_uid, sentence.text AS sentence,
-    foot_print.text AS foot_prints, impact_phrases, reason_phrases,
-    COLLECT(DISTINCT(entity.text)) AS named_entities;
+WITH
+    doc, sentence, foot_print, impact_phrases, reason_phrases,
+    COLLECT(DISTINCT(entity.text)) AS named_entities
+RETURN
+    doc.uid AS path_uid, COLLECT(DISTINCT(foot_print.text)) AS foot_prints, 
+    COLLECT(DISTINCT(impact_phrases)) AS impact_phrases, 
+    COLLECT(DISTINCT(reason_phrases)) AS reason_phrases,
+    COLLECT(DISTINCT(named_entities)) AS named_entities,
+    sentence.text AS sentence;
 //
 ////////////////////////////////////////////////////////////////////////

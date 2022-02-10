@@ -90,7 +90,7 @@ CALL apoc.custom.asFunction(
     WITH terms_nlp 
         CALL apoc.load.jsonParams($nltk_url, {method: "POST", contentType: "application/json"}, apoc.convert.toJson(terms_nlp)) 
             YIELD value AS terms_stem
-    RETURN REDUCE(l = [], s IN terms_stem.sentences | l + [[e IN REVERSE(TAIL(REVERSE(s.tokens))) WHERE SIZE(e.s) > 1 | e.s]]) 
+    RETURN REDUCE(l = [], s IN terms_stem.sentences | l + [[e IN REVERSE(TAIL(REVERSE(s.tokens))) WHERE SIZE(e.s) > 1 | [e.s, e.originalText]]]) 
         AS list_of_terms',
     'LIST OF LIST OF STRING',
     [['phrases', 'LIST OF STRING'], ['stanford_url', 'STRING'], ['nltk_url', 'STRING']],
