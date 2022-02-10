@@ -235,12 +235,6 @@ CALL apoc.periodic.iterate(
                 sent.entitymentions = apoc.convert.toJson(elem.entitymentions),
                 sent.tokens = apoc.convert.toJson(elem.tokens)
     WITH file_name, json, doc, item, elem, sent
-        UNWIND elem.entitymentions AS ent
-    WITH file_name, json, doc, item, elem, sent, ent
-        CALL apoc.merge.node(['NE_' + ent.ner, 'NAMED_ENTITY'], {text: ent.text}) YIELD node AS entity
-    WITH file_name, json, doc, item, elem, sent, entity
-        MERGE (sent)-[:HAS_NAMED_ENTITY]->(entity)
-    WITH file_name, json, doc, item, elem, sent
         FOREACH (kp IN elem.KP |
             MERGE (key_phrase:KEY_PHRASE {text: kp.t})
                 ON CREATE SET
@@ -268,6 +262,12 @@ CALL apoc.periodic.iterate(
             MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
         )
         MERGE (doc)-[:HAS_SENTENCE {section: 'c', item: item.b, index: elem.index}]->(sent)
+    WITH file_name, json, doc, item, elem, sent
+        UNWIND elem.entitymentions AS ent
+    WITH file_name, json, doc, item, elem, sent, ent
+        CALL apoc.merge.node(['NE_' + ent.ner, 'NAMED_ENTITY'], {text: ent.text}) YIELD node AS entity
+    WITH file_name, json, doc, item, elem, sent, entity
+        MERGE (sent)-[:HAS_NAMED_ENTITY]->(entity)
 ",
 {
     batchSize:10, iterateList:true, parallel:false

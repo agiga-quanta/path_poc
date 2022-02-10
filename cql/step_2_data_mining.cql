@@ -180,7 +180,7 @@ WITH
         WHERE doc.uid IN path_uid_list
 WITH doc, sentence
     MATCH (sentence)-[:HAS_NAMED_ENTITY]->(date:NE_DATE)
-WITH doc, sentence, COLLECT(date.text) AS dates
+WITH doc, sentence, COLLECT(DISTINCT(date.text)) AS dates
 WITH doc, sentence, 
     CASE SIZE(dates) = 0 
         WHEN TRUE THEN ['', ''] 
@@ -192,3 +192,56 @@ WITH doc, sentence,
 RETURN doc.uid AS path_uid, dates[0] AS from, dates[1] AS to, sentence.text AS sentence;
 //
 ////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+WITH
+    [
+        '14-HCAA-00225',
+        '14-HCAA-01139',
+        '14-HCAA-00258',
+        '17-HCAA-01168'
+    ] AS path_uid_list
+MATCH (n:DM1)
+WITH
+    apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
+    apoc.convert.fromJsonList(n.dm1_reasons) AS reasons,
+    path_uid_list
+    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
+        WHERE doc.uid IN path_uid_list AND r.item STARTS WITH '4.'
+WITH doc, sentence
+    MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
+WITH doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
+    WHERE apoc.coll.containsAll(words, ['letter', 'of', 'credit'])
+RETURN doc, sentence;
+//
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+// Demonstrate extracting
+// - credit (money quantity)
+// - from section 4. (likely 4.1) where there is a 'letter of credit' phrase
+//
+WITH
+    [
+        '14-HCAA-00225',
+        '14-HCAA-00258',
+        '14-HCAA-01139',
+        '17-HCAA-01168'
+    ] AS path_uid_list
+    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
+        WHERE doc.uid IN path_uid_list AND r.item STARTS WITH '4.'
+WITH doc, sentence
+    MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
+WITH doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
+    WHERE apoc.coll.containsAll(words, ['letter', 'of', 'credit'])
+WITH doc, sentence
+    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_MONEY)
+WITH doc, sentence, COLLECT(DISTINCT(entity.text)) AS credits
+WITH doc, sentence, credits,
+    CASE SIZE(credits) = 0  WHEN TRUE THEN sentence.text ELSE credits[0] END AS credit
+RETURN doc.uid AS path_uid, credit, sentence.text AS sentence;
+//
+////////////////////////////////////////////////////////////////////////
+
