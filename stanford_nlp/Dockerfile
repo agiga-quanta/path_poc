@@ -35,7 +35,7 @@ RUN apk update && apk add openjdk8-jre-base py3-pip && \
 WORKDIR /opt/corenlp
 COPY --from=builder /opt/corenlp .
 
-ENV JAVA_XMX 6g
+ENV JAVA_XMX 4g
 ENV ANNOTATORS tokenize,ssplit,pos,lemma,ner,parse
 ENV REGEXNER /conf/regexner.mappings
 ENV TIMEOUT_MILLISECONDS 300000
