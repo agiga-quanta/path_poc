@@ -8,9 +8,11 @@ from bottle import BaseRequest, hook, request, response, route, run
 from json import dumps, loads
 
 from nltk.stem.snowball import EnglishStemmer
+from nltk.corpus import stopwords
 
 BaseRequest.MEMFILE_MAX = 102400 * 1000
 stemmer = EnglishStemmer()
+stopwords = stopwords.words('english')
 
 
 CROSS_ORIGIN_RESOURCE_SHARING_HEADERS = {
@@ -43,8 +45,12 @@ def process():
             for s in res_json['sentences']:
                 if not s:
                     continue
+                tokens = [] 
                 for t in s['tokens']:
-                    t['s'] = stemmer.stem(t['lemma'].lower())
+                    if t['lemma'].lower() not in stopwords:
+                        t['stem'] = stemmer.stem(t['lemma'].lower())
+                        tokens.append(t)
+                s['tokens'] = tokens
         return dumps(res_json)
 
     except Exception:
