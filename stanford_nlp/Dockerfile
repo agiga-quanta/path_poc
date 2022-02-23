@@ -1,4 +1,4 @@
-FROM alpine:3.15 as builder
+FROM alpine:3.10 as builder
 
 RUN apk update && \
     apk add git wget openjdk8-jre-base py2-pip py2-curl && \
@@ -27,7 +27,7 @@ RUN wget $(grepurl -r 'english.*jar$' -a http://stanfordnlp.github.io/CoreNLP | 
 
 
 # only keep the things we need to run and test CoreNLP
-FROM alpine:3.15
+FROM alpine:3.10
 
 RUN apk update && apk add openjdk8-jre-base py3-pip && \
     pip3 install pytest pexpect requests
@@ -36,12 +36,12 @@ WORKDIR /opt/corenlp
 COPY --from=builder /opt/corenlp .
 
 ENV JAVA_XMX 4g
-ENV ANNOTATORS tokenize,ssplit,pos,lemma,ner
-ENV TIMEOUT_MILLISECONDS 15000
+ENV ANNOTATORS tokenize,ssplit,pos,lemma,ner,parse
+ENV REGEXNER /conf/regexner.mappings
+ENV TIMEOUT_MILLISECONDS 30000
 
 ENV PORT 9000
 
 EXPOSE $PORT
 
-
-CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -annotators "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS
+CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -annotators "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS -ner.additional.regexner.mapping $REGEXNER 

@@ -12,7 +12,7 @@ RETURN custom.extract_terms(terms, stanford_url, nltk_url);
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Process and store impact and reason (cause) terms
+// (Part of PoC Case 1) Process and store impact and reason (cause) terms
 //
 WITH
     [
@@ -70,14 +70,14 @@ MERGE (n:DM1)
         n.dm1_impacts = apoc.convert.toJson(custom.extract_terms(dm1_impacts, stanford_url, nltk_url)),
         n.dm1_reasons = apoc.convert.toJson(custom.extract_terms(dm1_reasons, stanford_url, nltk_url))
 RETURN
-    SIZE(apoc.convert.fromJsonList(n.dm1_impacts)) AS impacts,
-    SIZE(apoc.convert.fromJsonList(n.dm1_reasons)) AS reasons;
+    apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
+    apoc.convert.fromJsonList(n.dm1_reasons) AS reasons;
 //
 ////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Demonstrate capturing foot print in 
+// (Part of PoC Case 1) Demonstrate capturing foot print in 
 // - the impact_harm item of the description section
 //
 WITH
@@ -100,7 +100,7 @@ RETURN doc, sentence;
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Demonstrate 
+// PoC Case 1: Demonstrate 
 // - capturing impact and reason terms 
 // - for existing foot print 
 // - in the impact_harm item of the description section
@@ -115,7 +115,7 @@ WITH
         '14-HCAA-00258',
         '17-HCAA-01168'
     ] AS path_uid_list
-    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT)
+    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_NAMED_ENTITY]->(foot_print:NE_FOOTPRINT)
         WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
 WITH impact_terms, reason_terms, doc, sentence, foot_print
     MATCH
@@ -144,7 +144,10 @@ WITH impact_terms, reason_terms, doc, sentence, foot_print,
         'NE_LOCATION', 
         'NE_ORGANIZATION', 
         'NE_PERSON', 
-        'NE_TITLE'
+        'NE_TITLE',
+        'NE_BUILDING',
+        'NE_ECOLOGY',
+        'NE_WATERBODY'
     ] AS entity_types,
     doc, sentence, foot_print, impact_phrases, reason_phrases
     OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity)
@@ -163,7 +166,7 @@ RETURN
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Demonstrate 
+// PoC Case 2: Demonstrate 
 // - extract from and to dates
 // - from conditions section, item 1.
 //
@@ -171,9 +174,7 @@ WITH
     [
         '14-HCAA-00225',
         '14-HCAA-00258',
-        '14-HCAA-00645',
         '14-HCAA-01139',
-        '16-HCAA-00616',
         '17-HCAA-01168'
     ] AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c', item: '1.'}]-(sentence:SENTENCE)
@@ -195,35 +196,56 @@ RETURN doc.uid AS path_uid, dates[0] AS from, dates[1] AS to, sentence.text AS s
 
 ////////////////////////////////////////////////////////////////////////
 //
+// (Part of PoC Case 3) Process and store letter of credit terms
+//
 WITH
+    [
+        "letter of credit"
+    ] AS dm3_terms,
+    "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
+    "http://nltk_nlp:6543/stem"  AS nltk_url
+MERGE (n:DM3)
+    SET 
+        n.dm3_terms = apoc.convert.toJson(custom.extract_terms(dm3_terms, stanford_url, nltk_url))
+RETURN
+    apoc.convert.fromJsonList(n.dm3_terms) AS loc_terms;
+//
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+// (Part of PoC Case 3)
+// - identiy sentences
+// - from section 4. (likely 4.1) where there is a 'letter of credit' phrase
+//
+MATCH (n:DM3)
+WITH 
+    apoc.convert.fromJsonList(n.dm3_terms) AS loc_terms,
     [
         '14-HCAA-00225',
         '14-HCAA-01139',
         '14-HCAA-00258',
         '17-HCAA-01168'
     ] AS path_uid_list
-MATCH (n:DM1)
-WITH
-    apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
-    apoc.convert.fromJsonList(n.dm1_reasons) AS reasons,
-    path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
         WHERE doc.uid IN path_uid_list AND r.item STARTS WITH '4.'
-WITH doc, sentence
+WITH loc_terms, doc, sentence
     MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
-WITH doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
-    WHERE apoc.coll.containsAll(words, ['letter', 'of', 'credit'])
+WITH loc_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
+    WHERE ANY(term IN loc_terms WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))
 RETURN doc, sentence;
 //
 ////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Demonstrate extracting
-// - credit (money quantity)
+// PoC Case 3: Demonstrate
+// - extracting credit (money quantity)
 // - from section 4. (likely 4.1) where there is a 'letter of credit' phrase
 //
-WITH
+MATCH (n:DM3)
+WITH 
+    apoc.convert.fromJsonList(n.dm3_terms) AS loc_terms,
     [
         '14-HCAA-00225',
         '14-HCAA-00258',
@@ -232,10 +254,10 @@ WITH
     ] AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
         WHERE doc.uid IN path_uid_list AND r.item STARTS WITH '4.'
-WITH doc, sentence
+WITH loc_terms, doc, sentence
     MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
-WITH doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
-    WHERE apoc.coll.containsAll(words, ['letter', 'of', 'credit'])
+WITH loc_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
+    WHERE ANY(term IN loc_terms WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))
 WITH doc, sentence
     OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_MONEY)
 WITH doc, sentence, COLLECT(DISTINCT(entity.text)) AS credits
@@ -245,3 +267,64 @@ RETURN doc.uid AS path_uid, credit, sentence.text AS sentence;
 //
 ////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////
+//
+// (Part of PoC Case 4) Demonstrate
+// - look up documents 
+// - has (i) 'conditions for offsettings'
+// - (ii) has 'scale and desctiption of offsetting measures',
+//      if absent then use the first bullet after (i)
+// - (iii) has 'contingency measures'
+//      if absent then use the first bullet before the next bullet at the same level with (i)
+// - extract all bullets between (ii) (inclusive) and (iii) (exclusive).
+//
+WITH 
+    [
+        '13-HCAA-CA1-00850',
+        '13-HCAA-CA1-00891',
+        '14-HCAA-00225',
+        '14-HCAA-00258',
+        '14-HCAA-01139',
+        '15-HCAA-00124',
+        '15-HCAA-00279',
+        '15-HCAA-01013',
+        '16-HCAA-01202',
+        '16-HCAA-01206',
+        '17-HCAA-01168'
+    ] AS path_uid_list
+MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+    WHERE 
+        doc.uid IN path_uid_list AND
+        s.text =~ 'Conditions\\s+that\\s+relate\\s+to(\\s+the)?\\s+(compensation|(habitat\\s+)?offsett?ing)(\\s+(for|of)(\\s+the\\s+serious\\s+(b|h)arm\\s+to\\s+(f|F)ish(\\s+and\\s+impacts\\s+(on|to)\\s+aquatic\\s+species\\s+at\\s+risk)?\\s+likely\\s+to\\s+result\\s+from)?\\s+the\\s+authorized\\s+work,\\s+undertaking\\s+or\\s+activity(\\s+that\\s+results\\s+in\\s+impacts\\s+to\\s+fish(\\s+and\\s+fish)?\\s+habitat)?)?\\:?'
+WITH doc, r.item AS ri
+    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+        WHERE r.item STARTS WITH ri AND r.item <> ri
+WITH doc, apoc.coll.sort(COLLECT(DISTINCT(r.item))) AS rc
+    OPTIONAL MATCH
+        (doc)-[r1:HAS_SENTENCE {section: 'c'}]-(s1:SENTENCE),
+        (doc)-[r2:HAS_SENTENCE {section: 'c'}]-(s2:SENTENCE)
+        WHERE 
+            r1.item IN rc AND 
+            s1.text =~ 'Scale\\s+and\\s+description\\s+of\\s+offsetting\\s+measures.*' AND
+            r2.item IN rc AND
+            s2.text =~ 'Contingency\\s+measures.*'           
+WITH doc, rc, COLLECT(DISTINCT(r1.item)) AS r1c, COLLECT(DISTINCT(r2.item)) AS r2c
+WITH doc, rc,
+    REDUCE(r = HEAD(r1c), e IN r1c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r1,
+    REDUCE(r = HEAD(r2c), e IN r2c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r2
+WITH doc, r1, r2, 
+    CASE 
+        WHEN r1 IS NULL AND r2 IS NULL THEN rc
+        WHEN r1 IS NULL AND r2 IS NOT NULL THEN 
+            REDUCE(r = [], e IN rc | CASE e < r2  WHEN TRUE THEN r + [e] ELSE r END)
+        WHEN r1 IS NOT NULL AND r2 IS NULL THEN 
+            REDUCE(r = [], e IN rc | CASE e >= r1  WHEN TRUE THEN r + [e] ELSE r END)
+        ELSE 
+            REDUCE(r = [], e IN rc | CASE e >= r1 AND e < r2  WHEN TRUE THEN r + [e] ELSE r END)
+    END AS rc
+WITH doc, rc
+    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+        WHERE r.item IN rc
+RETURN doc, r, s;
+//
+////////////////////////////////////////////////////////////////////////

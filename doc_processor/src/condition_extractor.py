@@ -74,9 +74,7 @@ class ConditionExtractor(object):
                 continue
             spl.process(nlp_doc, doc_id)
             for nlp_sent in nlp_doc['sentences']:
-                pos_dict = pos.collect_phrases(nlp_sent['tokens'])
-                for entity, ent_dict in pos_dict.items():
-                    nlp_sent[entity] = ent_dict
+                pos.collect_phrases(nlp_sent)
             section[i] = {'b': bullet, 't': content, 's': nlp_doc['sentences']}
 
         if self.DEBUG >= 1:

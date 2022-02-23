@@ -44,9 +44,12 @@ CREATE INDEX path_sentence FOR ()-[r:HAS_SENTENCE]-() ON (r.section, r.item);
 //
 CREATE CONSTRAINT ON (n:KEY_PHRASE) ASSERT n.text IS UNIQUE;
 //
-CREATE CONSTRAINT ON (n:FOOT_PRINT) ASSERT n.text IS UNIQUE;
-//
 CREATE INDEX ON :NAMED_ENTITY(text);
+//
+CREATE CONSTRAINT ON (n:NE_BUILDING) ASSERT n.text IS UNIQUE;
+CREATE CONSTRAINT ON (n:NE_ECOLOGY) ASSERT n.text IS UNIQUE;
+CREATE CONSTRAINT ON (n:NE_FOOTPRINT) ASSERT n.text IS UNIQUE;
+CREATE CONSTRAINT ON (n:NE_WATERBODY) ASSERT n.text IS UNIQUE;
 //
 CREATE CONSTRAINT ON (n:NE_PERSON) ASSERT n.text IS UNIQUE;
 CREATE CONSTRAINT ON (n:NE_LOCATION) ASSERT n.text IS UNIQUE;
@@ -176,11 +179,32 @@ CALL apoc.periodic.iterate(
                 doc.project_geo_location = CASE SIZE(json.location.geo_location) > 0
                     WHEN TRUE THEN json.location.geo_location ELSE null END,
                 doc.project_location = CASE SIZE(json.location.geocode) > 0
-                    WHEN TRUE THEN POINT({latitude: json.location.geocode[0], longitude: json.location.geocode[1]}) ELSE null END
+                    WHEN TRUE THEN POINT({latitude: json.location.geocode[0], longitude: json.location.geocode[1]}) ELSE null END;
+",
+{
+    batchSize:10, iterateList:true, parallel:false
+});
+//
+////////////////////////////////////////////////////////////////////////
 
-                // doc.description = apoc.convert.toJson(json.description),
-                // doc.conditions = apoc.convert.toJson(json.conditions)
-
+////////////////////////////////////////////////////////////////////////
+//
+// Load list of file names for all *.json files in /import directory
+// Load each of *.json files in /import directory
+//
+CALL apoc.periodic.iterate(
+"
+    CALL apoc.load.directory('*.json')
+        YIELD value
+    WITH value AS file_name ORDER BY file_name ASC
+        CALL apoc.load.json(file_name)
+            YIELD value
+    RETURN
+        SUBSTRING(file_name, 0, apoc.text.indexOf(file_name, '_Auth')) AS file_name,
+        value AS json
+", "
+    WITH file_name, json
+        MERGE (doc:PATH {uid: file_name})
     WITH file_name, json, doc    
         UNWIND json.description AS item
     WITH file_name, json, doc, item
@@ -188,43 +212,55 @@ CALL apoc.periodic.iterate(
     WITH file_name, json, doc, item, elem
         MERGE (sent:SENTENCE {file_name: file_name, text: elem.c})
             ON CREATE SET
-                sent.entitymentions = apoc.convert.toJson(elem.entitymentions),
-                sent.tokens = apoc.convert.toJson(elem.tokens)
+                sent.named_entities = apoc.convert.toJson(elem.named_entities),
+                sent.key_phrases = apoc.convert.toJson(elem.key_phrases)
+
     WITH file_name, json, doc, item, elem, sent
-        UNWIND elem.entitymentions AS ent
-    WITH file_name, json, doc, item, elem, sent, ent
-        CALL apoc.merge.node(['NE_' + ent.ner, 'NAMED_ENTITY'], {text: ent.text}) YIELD node AS entity
-    WITH file_name, json, doc, item, elem, sent, entity
-        MERGE (sent)-[:HAS_NAMED_ENTITY]->(entity)
-    WITH file_name, json, doc, item, elem, sent
-        FOREACH (kp IN elem.KP |
-            MERGE (key_phrase:KEY_PHRASE {text: kp.t})
+        FOREACH (kp IN elem.key_phrases |
+            MERGE (key_phrase:KEY_PHRASE {text: kp.l})
                 ON CREATE SET
                     key_phrase.original = kp.o
             FOREACH (w IN kp.w |
-                MERGE (word:WORD {stem: TOLOWER(w.s)})
+                MERGE (word:WORD {stem: TOLOWER(w.stem)})
                     ON CREATE SET
-                        word.original = w.o,
-                        word.lemma = w.l
-                MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
+                        word.lemma = w.lemma
+                MERGE (key_phrase)-[:HAS_WORD {pos: w.pos, ner: w.ner}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
         )
-        FOREACH (fp IN elem.FP |
-            MERGE (foot_print:FOOT_PRINT {text: fp.t})
-                ON CREATE SET
-                    foot_print.original = fp.o
-            FOREACH (w IN fp.w |
-                MERGE (word:WORD {stem: TOLOWER(w.s)})
-                    ON CREATE SET
-                        word.original = w.o,
-                        word.lemma = w.l
-                MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
-            )
-            MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
-        )
         MERGE (doc)-[:HAS_SENTENCE {section: 'd', item: item.name, index: elem.index}]->(sent)
 
+    WITH file_name, json, doc, item, elem, sent
+        UNWIND elem.named_entities AS ent
+    WITH file_name, json, doc, item, elem, sent, ent
+        CALL apoc.merge.node(['NE_' + ent.ner, 'NAMED_ENTITY'], {text: ent.text}) YIELD node AS entity
+    WITH file_name, json, doc, item, elem, sent, entity
+        MERGE (sent)-[:HAS_NAMED_ENTITY]->(entity);
+",
+{
+    batchSize:10, iterateList:true, parallel:false
+});
+//
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+// Load list of file names for all *.json files in /import directory
+// Load each of *.json files in /import directory
+//
+CALL apoc.periodic.iterate(
+"
+    CALL apoc.load.directory('*.json')
+        YIELD value
+    WITH value AS file_name ORDER BY file_name ASC
+        CALL apoc.load.json(file_name)
+            YIELD value
+    RETURN
+        SUBSTRING(file_name, 0, apoc.text.indexOf(file_name, '_Auth')) AS file_name,
+        value AS json
+", "
+    WITH file_name, json
+        MERGE (doc:PATH {uid: file_name})
     WITH file_name, json, doc
         UNWIND json.conditions AS item
     WITH file_name, json, doc, item
@@ -232,38 +268,26 @@ CALL apoc.periodic.iterate(
     WITH file_name, json, doc, item, elem
         MERGE (sent:SENTENCE {file_name: file_name, text: elem.c})
             ON CREATE SET
-                sent.entitymentions = apoc.convert.toJson(elem.entitymentions),
-                sent.tokens = apoc.convert.toJson(elem.tokens)
+                sent.named_entities = apoc.convert.toJson(elem.named_entities),
+                sent.key_phrases = apoc.convert.toJson(elem.key_phrases)
+
     WITH file_name, json, doc, item, elem, sent
-        FOREACH (kp IN elem.KP |
-            MERGE (key_phrase:KEY_PHRASE {text: kp.t})
+        FOREACH (kp IN elem.key_phrases |
+            MERGE (key_phrase:KEY_PHRASE {text: kp.l})
                 ON CREATE SET
                     key_phrase.original = kp.o
             FOREACH (w IN kp.w |
-                MERGE (word:WORD {stem: TOLOWER(w.s)})
+                MERGE (word:WORD {stem: w.stem})
                     ON CREATE SET
-                        word.original = w.o,
-                        word.lemma = w.l
-                MERGE (key_phrase)-[:HAS_WORD {pos_tag: w.p}]->(word)
+                        word.lemma = w.lemma
+                MERGE (key_phrase)-[:HAS_WORD {pos: w.pos, ner: w.ner}]->(word)
             )
             MERGE (sent)-[:HAS_KEY_PHRASE]->(key_phrase)
-        )
-        FOREACH (fp IN elem.FP |
-            MERGE (foot_print:FOOT_PRINT {text: fp.t})
-                ON CREATE SET
-                    foot_print.original = fp.o
-            FOREACH (w IN fp.w |
-                MERGE (word:WORD {stem: TOLOWER(w.s)})
-                    ON CREATE SET
-                        word.original = w.o,
-                        word.lemma = w.l
-                MERGE (foot_print)-[:HAS_WORD {pos_tag: w.p}]->(word)
-            )
-            MERGE (sent)-[:HAS_FOOT_PRINT]->(foot_print)
-        )
+        )   
         MERGE (doc)-[:HAS_SENTENCE {section: 'c', item: item.b, index: elem.index}]->(sent)
+
     WITH file_name, json, doc, item, elem, sent
-        UNWIND elem.entitymentions AS ent
+        UNWIND elem.named_entities AS ent
     WITH file_name, json, doc, item, elem, sent, ent
         CALL apoc.merge.node(['NE_' + ent.ner, 'NAMED_ENTITY'], {text: ent.text}) YIELD node AS entity
     WITH file_name, json, doc, item, elem, sent, entity

@@ -44,7 +44,7 @@ def process():
                 if not s:
                     continue
                 for t in s['tokens']:
-                    t['s'] = stemmer.stem(t['lemma'])
+                    t['s'] = stemmer.stem(t['lemma'].lower())
         return dumps(res_json)
 
     except Exception:

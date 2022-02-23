@@ -93,9 +93,7 @@ class DescriptionExtractor(object):
                 continue
             spl.process(nlp_doc, doc_id)
             for nlp_sent in nlp_doc['sentences']:
-                pos_dict = pos.collect_phrases(nlp_sent['tokens'])
-                for entity, ent_dict in pos_dict.items():
-                    nlp_sent[entity] = ent_dict
+                pos.collect_phrases(nlp_sent)
 
             assert 'k' in element, '%s %s' % (name, element['t'])
             section.append({

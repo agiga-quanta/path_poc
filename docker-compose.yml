@@ -60,6 +60,8 @@ services:
       - backend
     ports:
       - 9000:9000
+    volumes:
+      - ./conf:/conf
 
   ####################
   # neo4j:
