@@ -32,3 +32,5 @@ up to ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s? in size	FOOTPRIN
 approximately ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (kilogram|kg)s? per [a-z]+	FOOTPRINT	RB|CD|IN|NN|NNS	1.0
 ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (kilogram|kg)s? per [a-z]+	FOOTPRINT	CD|IN|NN|NNS	1.0
 ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? habitat unit	FOOTPRINT	CD|JJ|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? and ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? c(enti)?m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
