@@ -1,4 +1,4 @@
-FROM alpine:3.10 as builder
+FROM maven:alpine as builder
 
 RUN apk update && \
     apk add git wget openjdk8-jre-base py2-pip py2-curl && \
