@@ -50,7 +50,6 @@ def process():
                         t['stem'] = ''
                     else:
                         t['stem'] = stemmer.stem(t['lemma'].lower())
-                    print(t)
         return dumps(res_json)
 
     except Exception:
