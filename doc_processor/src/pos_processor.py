@@ -35,7 +35,7 @@ class POSProcessor(object):
                 not subtree[0].isalpha() or \
                     token['ner'] in self.NE_TAGS:
                 continue
-            assert subtree[0] == token['word'], f"{subtree} {token}\n {tokens}"
+            assert subtree[0] == token['word'], f"{subtree[0]} {token['word']}\n {subtree} {tokens}"
             token['stem'] = self.stemmer.stem(token['lemma'].lower())
             subtree[0] = token
             id2.add(idx)
