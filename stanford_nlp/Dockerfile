@@ -39,9 +39,10 @@ ENV JAVA_XMX 4g
 ENV ANNOTATORS tokenize,ssplit,pos,lemma,ner,parse
 ENV REGEXNER /conf/regexner.mappings
 ENV TIMEOUT_MILLISECONDS 300000
+ENV PARSE_MAXLEN 70
 
 ENV PORT 9000
 
 EXPOSE $PORT
 
-CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -annotators "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS -ner.additional.regexner.mapping $REGEXNER 
+CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -annotators "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS -ner.additional.regexner.mapping $REGEXNER -parse.maxlen $PARSE_MAXLEN
