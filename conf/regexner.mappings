@@ -1,6 +1,7 @@
 Truax Dam	DAM	ORGANIZATION	1.0
 Beatty Saugeen River	WATERBODY	LOCATION|TITLE	1.0
-(Abitibi|Elbow|Saugeen) River	WATERBODY	LOCATION|TITLE	1.0
+(Abitibi|Elbow|Kananaskis|Saugeen) River	WATERBODY	LOCATION|TITLE	1.0
+Evan Thomas Creek	WATERBODY	LOCATION	1.0
 (Meux|Otter|Karel) Creek	WATERBODY	LOCATION	1.0
 Lake (Huron|Ontario) watershed	ECOLOGY	NNP|NN	1.0
 Lake (Huron|Ontario)	WATERBODY	LOCATION|CITY	1.0
@@ -24,9 +25,14 @@ Abitibi Canyon	LOCATION	NNP|ORGANIZATION	1.0
 [A-Z][a-z]+ terminal site	LOCATION	NNP|NN	1.0
 [A-Z][a-z]+ terminal	BUILDING	NNP|NN	1.0
 [A-Z][a-z]+ pier	BUILDING	NNP|NN	1.0
+Kananaskis golf course	BUILDING	NNP|NN	1.0
 Station \d \+\d{3}	BUILDING	NN|NNP|CD	1.0
 Bruce Power	ORGANIZATION	PERSON	1.0
 Matrix Solutions Inc\.	ORGANIZATION	NNP|NNPS	1.0
+Fisheries and Oceans Canada \(DFO\)	ORGANIZATION	NNP|NNPS	1.0
+Fisheries and Oceans Canada	ORGANIZATION	NNP|NNPS	1.0
+Department of Fisheries and Oceans \(DFO\)	ORGANIZATION	NNP|NNPS	1.0
+Department of Fisheries and Oceans	ORGANIZATION	NNP|NNPS	1.0
 ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
 ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? and ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? c(enti)?m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
 minimum of ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s? in size	FOOTPRINT	CD|IN|JJ|NN|NNS	1.0

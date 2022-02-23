@@ -25,7 +25,7 @@ WITH
         "permanent alteration", 
         "permanent destruction",
         "temporary alteration"
-    ] AS dm1_impacts,
+    ] AS impacts,
     [
         "abutment",
         "armouring",
@@ -62,16 +62,16 @@ WITH
         "shoreline protection",
         "spur",
         "temporary infilling"
-    ] AS dm1_reasons,
+    ] AS reasons,
     "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
     "http://nltk_nlp:6543/stem"  AS nltk_url
 MERGE (n:DM1)
     SET 
-        n.dm1_impacts = apoc.convert.toJson(custom.extract_terms(dm1_impacts, stanford_url, nltk_url)),
-        n.dm1_reasons = apoc.convert.toJson(custom.extract_terms(dm1_reasons, stanford_url, nltk_url))
+        n.impacts = apoc.convert.toJson(custom.extract_terms(impacts, stanford_url, nltk_url)),
+        n.reasons = apoc.convert.toJson(custom.extract_terms(reasons, stanford_url, nltk_url))
 RETURN
-    apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
-    apoc.convert.fromJsonList(n.dm1_reasons) AS reasons;
+    apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,
+    apoc.convert.fromJsonList(n.reasons) AS dm1_reasons;
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -89,8 +89,8 @@ WITH
     ] AS path_uid_list
 MATCH (n:DM1)
 WITH
-    apoc.convert.fromJsonList(n.dm1_impacts) AS impacts,
-    apoc.convert.fromJsonList(n.dm1_reasons) AS reasons,
+    apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,
+    apoc.convert.fromJsonList(n.reasons) AS dm1_reasons,
     path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)
         WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
@@ -107,8 +107,8 @@ RETURN doc, sentence;
 //
 MATCH (n:DM1)
 WITH 
-    apoc.convert.fromJsonList(n.dm1_impacts) AS impact_terms,
-    apoc.convert.fromJsonList(n.dm1_reasons) AS reason_terms,
+    apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,
+    apoc.convert.fromJsonList(n.reasons) AS dm1_reasons,
     [ 
         '14-HCAA-00225',
         '14-HCAA-01139',
@@ -117,25 +117,25 @@ WITH
     ] AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_NAMED_ENTITY]->(foot_print:NE_FOOTPRINT)
         WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
-WITH impact_terms, reason_terms, doc, sentence, foot_print
+WITH dm1_impacts, dm1_reasons, doc, sentence, foot_print
     MATCH
         (sentence)-[:HAS_KEY_PHRASE]->(impact_phrase:KEY_PHRASE)-[:HAS_WORD]->(iword:WORD),
         (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
     WHERE impact_phrase <> reason_phrase
-WITH impact_terms, reason_terms, doc, sentence, foot_print, 
+WITH dm1_impacts, dm1_reasons, doc, sentence, foot_print, 
     COLLECT(DISTINCT(iword.stem)) AS iwords, COLLECT(DISTINCT(rword.stem)) AS rwords
     WHERE
-        ANY(term IN impact_terms WHERE apoc.coll.containsAll(iwords, [e IN term | e[0]])) AND
-        ANY(term IN reason_terms WHERE apoc.coll.containsAll(rwords, [e IN term | e[0]]))
-WITH impact_terms, reason_terms, doc, sentence, foot_print, 
+        ANY(term IN dm1_impacts WHERE apoc.coll.containsAll(iwords, [e IN term | e[0]])) AND
+        ANY(term IN dm1_reasons WHERE apoc.coll.containsAll(rwords, [e IN term | e[0]]))
+WITH dm1_impacts, dm1_reasons, doc, sentence, foot_print, 
     COLLECT(DISTINCT(iwords)) AS impact_phrases,
     COLLECT(DISTINCT(rwords)) AS reason_phrases
-WITH impact_terms, reason_terms, doc, sentence, foot_print, 
-    REDUCE(r = [], term IN impact_terms | 
+WITH dm1_impacts, dm1_reasons, doc, sentence, foot_print, 
+    REDUCE(r = [], term IN dm1_impacts | 
         CASE ANY(phrase IN impact_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))
             WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END
     ) AS impact_phrases,
-    REDUCE(r = [], term IN reason_terms | 
+    REDUCE(r = [], term IN dm1_reasons | 
         CASE ANY(phrase IN reason_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))
             WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END
     ) AS reason_phrases
@@ -201,14 +201,14 @@ RETURN doc.uid AS path_uid, dates[0] AS from, dates[1] AS to, sentence.text AS s
 WITH
     [
         "letter of credit"
-    ] AS dm3_terms,
+    ] AS terms,
     "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
     "http://nltk_nlp:6543/stem"  AS nltk_url
 MERGE (n:DM3)
     SET 
-        n.dm3_terms = apoc.convert.toJson(custom.extract_terms(dm3_terms, stanford_url, nltk_url))
+        n.terms = apoc.convert.toJson(custom.extract_terms(terms, stanford_url, nltk_url))
 RETURN
-    apoc.convert.fromJsonList(n.dm3_terms) AS loc_terms;
+    apoc.convert.fromJsonList(n.terms) AS dm3_terms;
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -220,7 +220,7 @@ RETURN
 //
 MATCH (n:DM3)
 WITH 
-    apoc.convert.fromJsonList(n.dm3_terms) AS loc_terms,
+    apoc.convert.fromJsonList(n.terms) AS dm3_terms,
     [
         '14-HCAA-00225',
         '14-HCAA-01139',
@@ -229,10 +229,10 @@ WITH
     ] AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
         WHERE doc.uid IN path_uid_list AND r.item STARTS WITH '4.'
-WITH loc_terms, doc, sentence
+WITH dm3_terms, doc, sentence
     MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
-WITH loc_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
-    WHERE ANY(term IN loc_terms WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))
+WITH dm3_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
+    WHERE ANY(term IN dm3_terms WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))
 RETURN doc, sentence;
 //
 ////////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ RETURN doc, sentence;
 //
 MATCH (n:DM3)
 WITH 
-    apoc.convert.fromJsonList(n.dm3_terms) AS loc_terms,
+    apoc.convert.fromJsonList(n.terms) AS dm3_terms,
     [
         '14-HCAA-00225',
         '14-HCAA-00258',
@@ -254,10 +254,10 @@ WITH
     ] AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
         WHERE doc.uid IN path_uid_list AND r.item STARTS WITH '4.'
-WITH loc_terms, doc, sentence
+WITH dm3_terms, doc, sentence
     MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
-WITH loc_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
-    WHERE ANY(term IN loc_terms WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))
+WITH dm3_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
+    WHERE ANY(term IN dm3_terms WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))
 WITH doc, sentence
     OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_MONEY)
 WITH doc, sentence, COLLECT(DISTINCT(entity.text)) AS credits
@@ -325,6 +325,109 @@ WITH doc, r1, r2,
 WITH doc, rc
     MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
         WHERE r.item IN rc
-RETURN doc, r, s;
+RETURN doc, s ORDER BY r.i ASC;
+//
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+WITH
+    [
+        "anchored tree root wads",
+        "baseline measurements",
+        "boulder bench",
+        "channels",
+        "clean large boulders",
+        "clean rock",
+        "concrete box culverts",
+        "discussions",
+        "embedded woody habitat structure",
+        "existing bottom substrate",
+        "fish habitat biologist",
+        "fish habitat features",
+        "Indigenous community",
+        "Indigenous nation",
+        "live brush layering",
+        "monitoring program",
+        "monitoring",
+        "new culverts",
+        "new stream channel",
+        "offsetting measures",
+        "offsetting plan",
+        "open water ponds",
+        "post-construction fish habitat conditions",
+        "riffle rock sections",
+        "riverbed dredged",
+        "rock reefs",
+        "rock revetment treatments",
+        "spawning habitat",
+        "stream morphological features",
+        "substrate composition",
+        "vegetated rip rap",
+        "Vegetation",
+        "water depths"
+    ] AS objects,
+    [
+        "armouring of culvert inlets",
+        "assist in the placement",
+        "backwater pools and flats",
+        "bank stability",
+        "baseline measurements of fish habitat present",
+        "cover and diversity",
+        "create artificial spawning areas",
+        "extent of HADD",
+        "food production",
+        "food supply",
+        "habitat diversity",
+        "improved fish passage",
+        "in-stream cover",
+        "increase the abundance of invertebrates",
+        "increase the diversity of invertebrates",
+        "increase the quality of invertebrates",
+        "increase the overall understanding of aquatic ecology",
+        "invertebrate food production",
+        "nearshore habitat features",
+        "provide food production habitat",
+        "riffle condition ",
+        "increase the diversity of cover habitats",
+        "substrate diversity "
+    ] AS goals,
+    [
+        "be onsite",
+        "conduct",
+        "confirm",
+        "construct",
+        "construction",
+        "create",
+        "creation",
+        "complete",
+        "determining",
+        "develop",
+        "engage",
+        "enhancement",
+        "establish",
+        "implement",
+        "implement",
+        "incorporation",
+        "install",
+        "installation",
+        "place",
+        "reconstruction",
+        "removal",
+        "report",
+        "undertake",
+        "verify"
+    ] AS actions,
+    "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
+    "http://nltk_nlp:6543/stem"  AS nltk_url
+MERGE (n:DM4)
+    SET 
+        n.objects = apoc.convert.toJson(custom.extract_terms(objects, stanford_url, nltk_url)),
+        n.goals = apoc.convert.toJson(custom.extract_terms(goals, stanford_url, nltk_url)),
+        n.actions = apoc.convert.toJson(custom.extract_terms(actions, stanford_url, nltk_url))
+RETURN
+    apoc.convert.fromJsonList(n.objects) AS d4_objects,
+    apoc.convert.fromJsonList(n.goals) AS d4_goals,
+    apoc.convert.fromJsonList(n.goals) AS d4_actions;
 //
 ////////////////////////////////////////////////////////////////////////

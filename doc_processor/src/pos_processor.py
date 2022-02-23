@@ -64,7 +64,7 @@ class POSProcessor(object):
                 })
 
         for i2 in id2:
-            if tokens[i2]['lemma'].lower()  not in self.stopwords:
+            if tokens[i2]['lemma'].lower() not in self.stopwords:
                 sentence['key_phrases'].append({
                     'o': tokens[i2]['originalText'],
                     'l': tokens[i2]['lemma'],
