@@ -38,7 +38,7 @@ COPY --from=builder /opt/corenlp .
 ENV JAVA_XMX 4g
 ENV ANNOTATORS tokenize,ssplit,pos,lemma,ner,parse
 ENV REGEXNER /conf/regexner.mappings
-ENV TIMEOUT_MILLISECONDS 30000
+ENV TIMEOUT_MILLISECONDS 300000
 
 ENV PORT 9000
 
