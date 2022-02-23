@@ -11,6 +11,10 @@ Lake Huron	WATERBODY	LOCATION|CITY	1.0
 [A-Z][a-z]+ terminal	BUILDING	NNP|NN	1.0
 Bruce Power	ORGANIZATION	PERSON	1.0
 Habitat Productivity Index	ECOLOGY	NNP	1.0
+HPI	ECOLOGY	NNP	1.0
+HADD	ECOLOGY	NNP	1.0
+Flood Damage Repairs	ECOLOGY	NNP	1.0
+Matrix Solutions Inc\.	ORGANIZATION	NNP|NNPS	1.0
 (D|d)eath of fish	ECOLOGY	NN|IN	1.0
 Station \d \+\d{3}	BUILDING	NN|NNP|CD	1.0
 ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
