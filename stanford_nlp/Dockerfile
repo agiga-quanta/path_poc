@@ -1,4 +1,4 @@
-FROM maven:alpine as builder
+FROM alpine:3.10 as builder
 
 RUN apk update && \
     apk add git wget openjdk8-jre-base py2-pip py2-curl && \
@@ -24,10 +24,6 @@ RUN wget https://nlp.stanford.edu/software/stanford-corenlp-latest.zip && \
 # and extracts its property file.
 WORKDIR /opt/corenlp
 RUN wget $(grepurl -r 'english.*jar$' -a http://stanfordnlp.github.io/CoreNLP | head -n 1)
-RUN wget https://nlp.stanford.edu/software/stanford-srparser-2014-10-23-models.jar
-RUN mvn install:install-file -Dfile=stanford-srparser-2014-10-23-models.jar \
-        -DgroupId=edu.stanford.nlp -DartifactId=stanford-srparser \
-        -Dversion=3.5.2 -Dpackaging=jar
 
 # only keep the things we need to run and test CoreNLP
 FROM alpine:3.10
@@ -43,10 +39,9 @@ ENV ANNOTATORS tokenize,ssplit,pos,lemma,ner,parse
 ENV REGEXNER /conf/regexner.mappings
 ENV TIMEOUT_MILLISECONDS 300000
 ENV PARSE_THREADS 16
-ENV PARSE_MODEL edu/stanford/nlp/models/srparser/englishSR.ser.gz
 
 ENV PORT 9000
 
 EXPOSE $PORT
 
-CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -preload "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS -ner.additional.regexner.mapping $REGEXNER -parse.nthreads $PARSE_THREADS -parse.model $PARSE_MODEL
+CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -preload "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS -ner.additional.regexner.mapping $REGEXNER -parse.nthreads $PARSE_THREADS
