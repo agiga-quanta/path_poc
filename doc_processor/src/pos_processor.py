@@ -56,11 +56,14 @@ class POSProcessor(object):
             for word_list in word_lists:
                 if not word_list:
                     continue
+                words = [w for w in word_list if w['lemma'].lower() not in self.stopwords]
+                if not words:
+                    continue
                 sentence['key_phrases'].append({
                     'o': ' '.join(w['originalText'] for w in word_list),
                     'l': ' '.join(w['lemma'] for w in word_list),
                     'p': '-'.join(w['pos'] for w in word_list),
-                    'w': [w for w in word_list if w['lemma'].lower() not in self.stopwords]
+                    'w': words
                 })
 
         for i2 in id2:
