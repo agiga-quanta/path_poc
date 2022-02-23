@@ -30,13 +30,14 @@ class POSProcessor(object):
 
         for subtree in parented_tree.subtrees(lambda t: t.height() == 2):
             idx += 1
+            token = tokens[idx]
             if subtree[0] in ['-LRB-', '-RRB-'] or \
                 not subtree[0].isalpha() or \
-                    tokens[idx]['ner'] in self.NE_TAGS:
+                    token['ner'] in self.NE_TAGS:
                 continue
-            assert subtree[0] == tokens[idx]['originalText']
-            tokens[idx]['stem'] = self.stemmer.stem(tokens[idx]['lemma'].lower())
-            subtree[0] = tokens[idx]
+            assert subtree[0] == token['originalText'], f"{subtree} {tokens}"
+            token['stem'] = self.stemmer.stem(token['lemma'].lower())
+            subtree[0] = token
             id2.add(idx)
 
         sentence['key_phrases'] = []
