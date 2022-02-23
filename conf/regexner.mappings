@@ -13,13 +13,8 @@ Bruce Power	ORGANIZATION	PERSON	1.0
 Habitat Productivity Index	ECOLOGY	NNP	1.0
 (D|d)eath of fish	ECOLOGY	NN|IN	1.0
 Station \d \+\d{3}	BUILDING	NN|NNP|CD	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s?	FOOTPRINT	CD|JJ|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m2 of fish habitat	FOOTPRINT	CD|IN|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m2 of habitat	FOOTPRINT	CD|IN|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m2	FOOTPRINT	CD|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? ha	FOOTPRINT	CD|JJ|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s? of fish habitat	FOOTPRINT	CD|JJ|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s? of habitat	FOOTPRINT	CD|JJ|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? and ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? c(enti)?m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
 minimum of ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s? in size	FOOTPRINT	CD|IN|JJ|NN|NNS	1.0
 minimum ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s? in size	FOOTPRINT	CD|JJ|NN|NNS	1.0
 minimum of ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m2	FOOTPRINT	CD|IN|JJ|NN	1.0
@@ -28,9 +23,14 @@ minimum of ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (hectare)s? in size	FOOTPRI
 minimum ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (hectare)s? in size	FOOTPRINT	CD|JJ|NN|NNS	1.0
 roughly ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s? in depth	FOOTPRINT	RB|CD|IN|NN|NNS	1.0
 up to ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s? in size	FOOTPRINT	RB|CD|IN|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s?	FOOTPRINT	CD|JJ|NN|NNS	1.0
 approximately ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (kilogram|kg)s? per [a-z]+	FOOTPRINT	RB|CD|IN|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s? of fish habitat	FOOTPRINT	CD|JJ|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s? of habitat	FOOTPRINT	CD|JJ|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (cubic|linear|square) m(eter|etre)?s?	FOOTPRINT	CD|JJ|NN|NNS	1.0
 ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? (kilogram|kg)s? per [a-z]+	FOOTPRINT	CD|IN|NN|NNS	1.0
 ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? habitat unit	FOOTPRINT	CD|JJ|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
-((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? and ((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? c(enti)?m(eter|etre)?s?	FOOTPRINT	CD|IN|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m(eter|etre)?s?	FOOTPRINT	CD|JJ|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m2 of fish habitat	FOOTPRINT	CD|IN|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m2 of habitat	FOOTPRINT	CD|IN|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? m2	FOOTPRINT	CD|NN|NNS	1.0
+((\d{1,3}(\,\d{3})+|\d{1,3})|\d+)(\.\d+)? ha	FOOTPRINT	CD|JJ|NN|NNS	1.0
