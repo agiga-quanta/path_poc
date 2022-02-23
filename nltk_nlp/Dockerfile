@@ -15,7 +15,7 @@ COPY src/ .
 COPY requirements.txt ./
 RUN pip3 install -r /requirements.txt
 RUN mkdir nltk_data
-# RUN python -m nltk.downloader -d ./nltk_data stemmers
+RUN python -m nltk.downloader -d ./nltk_data stopwords
 ENV NLTK_DATA=/nltk_data
 
 EXPOSE 6543
