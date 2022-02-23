@@ -45,12 +45,11 @@ def process():
             for s in res_json['sentences']:
                 if not s:
                     continue
-                tokens = [] 
                 for t in s['tokens']:
-                    if t['lemma'].lower() not in stopwords:
+                    if t['lemma'].lower() in stopwords:
+                        t['stem'] = ''
+                    else:
                         t['stem'] = stemmer.stem(t['lemma'].lower())
-                        tokens.append(t)
-                s['tokens'] = tokens
         return dumps(res_json)
 
     except Exception:

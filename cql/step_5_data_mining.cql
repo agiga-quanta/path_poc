@@ -1,17 +1,5 @@
 ////////////////////////////////////////////////////////////////////////
 //
-// Test connectivity from neo4j to stanford_nlp and nltk_nlp
-//
-WITH 
-    [ "destruction", "death of fish" ] AS terms,
-    "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
-    "http://nltk_nlp:6543/stem"  AS nltk_url
-RETURN custom.extract_terms(terms, stanford_url, nltk_url);
-//
-////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////
-//
 // (Part of PoC Case 1) Process and store impact and reason (cause) terms
 //
 WITH
@@ -67,8 +55,8 @@ WITH
     "http://nltk_nlp:6543/stem"  AS nltk_url
 MERGE (n:DM1)
     SET 
-        n.impacts = apoc.convert.toJson(custom.extract_terms(impacts, stanford_url, nltk_url)),
-        n.reasons = apoc.convert.toJson(custom.extract_terms(reasons, stanford_url, nltk_url))
+        n.impacts = apoc.convert.toJson(custom.run_nlp(impacts, stanford_url, nltk_url)),
+        n.reasons = apoc.convert.toJson(custom.run_nlp(reasons, stanford_url, nltk_url))
 RETURN
     apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,
     apoc.convert.fromJsonList(n.reasons) AS dm1_reasons;
@@ -206,7 +194,7 @@ WITH
     "http://nltk_nlp:6543/stem"  AS nltk_url
 MERGE (n:DM3)
     SET 
-        n.terms = apoc.convert.toJson(custom.extract_terms(terms, stanford_url, nltk_url))
+        n.terms = apoc.convert.toJson(custom.run_nlp(terms, stanford_url, nltk_url))
 RETURN
     apoc.convert.fromJsonList(n.terms) AS dm3_terms;
 //
@@ -269,67 +257,7 @@ RETURN doc.uid AS path_uid, credit, sentence.text AS sentence;
 
 ////////////////////////////////////////////////////////////////////////
 //
-// (Part of PoC Case 4) Demonstrate
-// - look up documents 
-// - has (i) 'conditions for offsettings'
-// - (ii) has 'scale and desctiption of offsetting measures',
-//      if absent then use the first bullet after (i)
-// - (iii) has 'contingency measures'
-//      if absent then use the first bullet before the next bullet at the same level with (i)
-// - extract all bullets between (ii) (inclusive) and (iii) (exclusive).
-//
-WITH 
-    [
-        '13-HCAA-CA1-00850',
-        '13-HCAA-CA1-00891',
-        '14-HCAA-00225',
-        '14-HCAA-00258',
-        '14-HCAA-01139',
-        '15-HCAA-00124',
-        '15-HCAA-00279',
-        '15-HCAA-01013',
-        '16-HCAA-01202',
-        '16-HCAA-01206',
-        '17-HCAA-01168'
-    ] AS path_uid_list
-MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
-    WHERE 
-        doc.uid IN path_uid_list AND
-        s.text =~ 'Conditions\\s+that\\s+relate\\s+to(\\s+the)?\\s+(compensation|(habitat\\s+)?offsett?ing)(\\s+(for|of)(\\s+the\\s+serious\\s+(b|h)arm\\s+to\\s+(f|F)ish(\\s+and\\s+impacts\\s+(on|to)\\s+aquatic\\s+species\\s+at\\s+risk)?\\s+likely\\s+to\\s+result\\s+from)?\\s+the\\s+authorized\\s+work,\\s+undertaking\\s+or\\s+activity(\\s+that\\s+results\\s+in\\s+impacts\\s+to\\s+fish(\\s+and\\s+fish)?\\s+habitat)?)?\\:?'
-WITH doc, r.item AS ri
-    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
-        WHERE r.item STARTS WITH ri AND r.item <> ri
-WITH doc, apoc.coll.sort(COLLECT(DISTINCT(r.item))) AS rc
-    OPTIONAL MATCH
-        (doc)-[r1:HAS_SENTENCE {section: 'c'}]-(s1:SENTENCE),
-        (doc)-[r2:HAS_SENTENCE {section: 'c'}]-(s2:SENTENCE)
-        WHERE 
-            r1.item IN rc AND 
-            s1.text =~ 'Scale\\s+and\\s+description\\s+of\\s+offsetting\\s+measures.*' AND
-            r2.item IN rc AND
-            s2.text =~ 'Contingency\\s+measures.*'           
-WITH doc, rc, COLLECT(DISTINCT(r1.item)) AS r1c, COLLECT(DISTINCT(r2.item)) AS r2c
-WITH doc, rc,
-    REDUCE(r = HEAD(r1c), e IN r1c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r1,
-    REDUCE(r = HEAD(r2c), e IN r2c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r2
-WITH doc, r1, r2, 
-    CASE 
-        WHEN r1 IS NULL AND r2 IS NULL THEN rc
-        WHEN r1 IS NULL AND r2 IS NOT NULL THEN 
-            REDUCE(r = [], e IN rc | CASE e < r2  WHEN TRUE THEN r + [e] ELSE r END)
-        WHEN r1 IS NOT NULL AND r2 IS NULL THEN 
-            REDUCE(r = [], e IN rc | CASE e >= r1  WHEN TRUE THEN r + [e] ELSE r END)
-        ELSE 
-            REDUCE(r = [], e IN rc | CASE e >= r1 AND e < r2  WHEN TRUE THEN r + [e] ELSE r END)
-    END AS rc
-WITH doc, rc
-    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
-        WHERE r.item IN rc
-RETURN doc, s ORDER BY r.i ASC;
-//
-////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////
+// (Part of PoC Case 4) Input data
 //
 WITH
     [
@@ -422,12 +350,88 @@ WITH
     "http://nltk_nlp:6543/stem"  AS nltk_url
 MERGE (n:DM4)
     SET 
-        n.objects = apoc.convert.toJson(custom.extract_terms(objects, stanford_url, nltk_url)),
-        n.goals = apoc.convert.toJson(custom.extract_terms(goals, stanford_url, nltk_url)),
-        n.actions = apoc.convert.toJson(custom.extract_terms(actions, stanford_url, nltk_url))
+        n.objects = apoc.convert.toJson(custom.run_nlp(objects, stanford_url, nltk_url)),
+        n.goals = apoc.convert.toJson(custom.run_nlp(goals, stanford_url, nltk_url)),
+        n.actions = apoc.convert.toJson(custom.run_nlp(actions, stanford_url, nltk_url))
 RETURN
     apoc.convert.fromJsonList(n.objects) AS d4_objects,
     apoc.convert.fromJsonList(n.goals) AS d4_goals,
     apoc.convert.fromJsonList(n.goals) AS d4_actions;
+//
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+// (Part of PoC Case 4) Demonstrate
+// - look up documents 
+// - has (i) 'conditions for offsettings'
+// - (ii) has 'scale and desctiption of offsetting measures',
+//      if absent then use the first bullet after (i)
+// - (iii) has 'contingency measures'
+//      if absent then use the first bullet before the next bullet at the same level with (i)
+// - extract all bullets between (ii) (inclusive) and (iii) (exclusive).
+//
+WITH 
+    [
+        '13-HCAA-CA1-00850',
+        '13-HCAA-CA1-00891',
+        '14-HCAA-00225',
+        '14-HCAA-00258',
+        '14-HCAA-01139',
+        '15-HCAA-00124',
+        '15-HCAA-00279',
+        '15-HCAA-01013',
+        '16-HCAA-01202',
+        '16-HCAA-01206',
+        '17-HCAA-01168'
+    ] AS path_uid_list
+MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+    WHERE 
+        doc.uid IN path_uid_list AND
+        s.text =~ 'Conditions\\s+that\\s+relate\\s+to(\\s+the)?\\s+(compensation|(habitat\\s+)?offsett?ing)(\\s+(for|of)(\\s+the\\s+serious\\s+(b|h)arm\\s+to\\s+(f|F)ish(\\s+and\\s+impacts\\s+(on|to)\\s+aquatic\\s+species\\s+at\\s+risk)?\\s+likely\\s+to\\s+result\\s+from)?\\s+the\\s+authorized\\s+work,\\s+undertaking\\s+or\\s+activity(\\s+that\\s+results\\s+in\\s+impacts\\s+to\\s+fish(\\s+and\\s+fish)?\\s+habitat)?)?\\:?'
+WITH doc, r.item AS ri
+    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+        WHERE r.item STARTS WITH ri AND r.item <> ri
+WITH doc, apoc.coll.sort(COLLECT(DISTINCT(r.item))) AS rc
+    OPTIONAL MATCH
+        (doc)-[r1:HAS_SENTENCE {section: 'c'}]-(s1:SENTENCE),
+        (doc)-[r2:HAS_SENTENCE {section: 'c'}]-(s2:SENTENCE)
+        WHERE 
+            r1.item IN rc AND 
+            s1.text =~ 'Scale\\s+and\\s+description\\s+of\\s+offsetting\\s+measures.*' AND
+            r2.item IN rc AND
+            s2.text =~ 'Contingency\\s+measures.*'           
+WITH doc, rc, COLLECT(DISTINCT(r1.item)) AS r1c, COLLECT(DISTINCT(r2.item)) AS r2c
+WITH doc, rc,
+    REDUCE(r = HEAD(r1c), e IN r1c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r1,
+    REDUCE(r = HEAD(r2c), e IN r2c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r2
+WITH doc, r1, r2, 
+    CASE 
+        WHEN r1 IS NULL AND r2 IS NULL THEN rc
+        WHEN r1 IS NULL AND r2 IS NOT NULL THEN 
+            REDUCE(r = [], e IN rc | CASE e < r2  WHEN TRUE THEN r + [e] ELSE r END)
+        WHEN r1 IS NOT NULL AND r2 IS NULL THEN 
+            REDUCE(r = [], e IN rc | CASE e >= r1  WHEN TRUE THEN r + [e] ELSE r END)
+        ELSE 
+            REDUCE(r = [], e IN rc | CASE e >= r1 AND e < r2  WHEN TRUE THEN r + [e] ELSE r END)
+    END AS rc
+WITH doc, rc
+    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
+        WHERE r.item IN rc
+WITH doc, sentence ORDER BY r.i ASC
+    MATCH (n:DM4)
+WITH doc, sentence,
+    apoc.convert.fromJsonList(n.objects) AS d4_objects
+        MATCH (sentence)-[:HAS_KEY_PHRASE]->(:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
+WITH d4_objects, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words
+    WHERE ANY(term IN d4_objects WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))
+WITH d4_objects, doc, sentence, 
+    COLLECT(DISTINCT(words)) AS object_phrases
+WITH doc, sentence,
+    REDUCE(r = [], term IN d4_objects | 
+        CASE ANY(phrase IN object_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))
+            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END
+    ) AS object_phrases
+RETURN doc.uid, object_phrases, sentence.text;
 //
 ////////////////////////////////////////////////////////////////////////
