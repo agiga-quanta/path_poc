@@ -44,4 +44,4 @@ ENV PORT 9000
 
 EXPOSE $PORT
 
-CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -preload "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS -ner.additional.regexner.mapping $REGEXNER -parse.nthreads $PARSE_THREADS
+CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -annotators "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS -ner.additional.regexner.mapping $REGEXNER -parse.nthreads $PARSE_THREADS
