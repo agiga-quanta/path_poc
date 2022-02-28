@@ -237,6 +237,6 @@ RETURN doc.uid,
     object_phrases, goal_phrases, action_phrases,
     foot_prints, dates,
     COLLECT(DISTINCT(entity.text)) AS entities,
-    sentence.txt;
+    sentence.text;
 //
 ////////////////////////////////////////////////////////////////////////
