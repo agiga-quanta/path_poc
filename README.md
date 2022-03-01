@@ -3,9 +3,9 @@ Proof of Concept (POC) for mining Program Activity Tracking for Habitat (PATH)
 
 ## Installation for Mac OS X
 
-### Install required software packages
+### A. Install required software packages
 
-#### Docker Desktop 
+#### A.1. Docker Desktop 
 
 Visit [Get Started with Docker](https://www.docker.com/get-started) and download Docker Desktop depending on which CPU version (Intel or Apple chip). 
 
@@ -15,7 +15,7 @@ Run the **Docker.app** to install. Run the app after installation. Once it start
 * Swap: 2 GB
 * Disk image size: 40 GB
 
-#### Homebrew (package manager)
+#### A.2. Homebrew (package manager)
 
 Visit [Homebrew](https://brew.sh), copy the link to run its installation at *Install Homebrew*.
 
@@ -28,7 +28,7 @@ Once done, update and upgrade brew:
     brew update
     brew upgrade
 
-##### Apple XCode Command Line Tools
+##### A.2.1 Apple XCode Command Line Tools
 
 Note: this is needed only if 
 - you have never installed the Command Line Tools.
@@ -57,19 +57,19 @@ and wait until the Command Line Tools are downloaded and installed. Then rerun:
 
 and wait until they finish.
 
-#### Install git
+#### A.3. Install git
 You will need git to automatically download or update the git repository for the source code of **path_poc** from [Github][https://github.com]
 
     brew install git
 
-#### Install curl
+#### A.4. Install curl
 You will need curl to automatically download binary data from [Dropbox](https://www.dropbox.com)
 
     brew install curl
 
-### Clone the source code repository and binary data
+### B. Clone the source code repository and binary data
 
-#### Clone path_poc repository from Github
+#### B.1 Clone path_poc repository from Github
 Go to the directory where you will use it. For example in your home directory,
 create a folder *work*,
 
@@ -82,7 +82,7 @@ Then run:
     git clone https://github.com/agiga-quanta/path_poc.git
     cd path_poc
 
-#### Download pre-processed binary data (xhtml, json)
+#### B.2 Download pre-processed binary data (xhtml, json)
 Create a *data* sub-folder,
 
     mkdir data
@@ -101,7 +101,7 @@ Download with *curl* the binary **jzon.zip**, which contains all *natural langua
     unzip xhtml.zip
     cd ..
 
-#### If you have already previous versions of some docker images and containers
+#### B.3 If you have already previous versions of some docker images and containers
 Clean them up by
 
     docker system prune -a
@@ -119,7 +119,7 @@ Check if you see a snipet like below, meaning you have 7 images and nothing else
         Stopped: 0
     Images: 7
 
-#### Get the docker images
+#### B.4 Get the docker images
 Make sure that you are inside the *path_poc* folder:
 
     pwd
@@ -147,9 +147,9 @@ You should see something as below,
     neo4j                       4.4.3     5e4d45f69541   2 weeks ago    579MB
     apache/tika                 2.1.0     0546ced95220   3 months ago   428MB
 
-### Processing pipelines
+### C. Processing pipelines
 
-#### Extracting data from pdf files
+#### C.1 Extracting data from pdf files
 Note that you don't have to do this since this already been done and the content of all processed files is packaged inside *xhtml.zip*
 However if you want to do it again, follow the instructions below.
 
@@ -173,7 +173,7 @@ Stop the *tika* docker to save memory,
 
     docker-compose stop tika
 
-#### Run the extracted data through a Stanford CoreNLP pipeline, with Wordnet dictionary
+#### C.2 Run the extracted data through a Stanford CoreNLP pipeline, with Wordnet dictionary
 Note that you don't have to do this since this already been done and the content of all processed files is packaged inside *json.zip*
 However if you want to do it again, follow the instructions below.
 
@@ -190,7 +190,7 @@ Then run the *doc_processor* docker
 
 This will process 248 **.xhtml* files into **.json* files.
 
-#### Using the *Standford CoreNLP with custom NERs* docker
+#### C.3 Using the *Standford CoreNLP with custom NERs* docker
 *Note:* you can check which dockers are running by:
 
     docker-compose ps
@@ -214,7 +214,7 @@ In the **- Annotations -** dropbox, select *part-of-speech*, *lemmas*, *named en
 It would take sometime to load the machined-learned (ML) datasets for the first run (or anytime when you change the set of annotators). 
 You now can see how the words are isolated, lemmatized, part-of-speech captured, named entities are recognized, and the tree of the constituency parsing result.
 
-#### Import json data into Neo4j database
+#### C.4 Import json data into Neo4j database
 Now, open a browser and point at [Neo4j](http://localhost:7474), you will see the interface to access and run some queries with Neo4j. You can also manually type into the address box:
 
     http://localhost:7474
@@ -222,7 +222,7 @@ Now, open a browser and point at [Neo4j](http://localhost:7474), you will see th
 If it is the first time you access Neo4j from the browser, you will see a form **Connect to Neo4j**, type *neo4j* into the *Username* edit box,
 and *path_poc* (all small caps and an underscore character) into the *Password* edit box, then click *Connect* button.
 
-##### Test if Neo4j is ready
+##### C.4.1 Test if Neo4j is ready
 Copy and paste the following query into the edit box started with the prompt **neo4j$** to test if the database is ready
 
     CALL dbms.components()
@@ -241,7 +241,7 @@ You can click the **blue arrow** or press *Cmd+Enter* (after copy the query into
 |------|----------------|---------|-------------|
 | 1    | "Neo4j Kernel" | "4.4.3" | "community" |
 
-##### Import json data into Neo4j
+##### C.4.2 Import json data into Neo4j
 Now, open *Finder*, navigate to the folder *path_poc*, go into sub-folder *cql*, open the file **all_in_one.cql** with *TextEdit.app* (left click, select Open, select *TextEdit.app*).
 
 Use *Cmd+A* to select all the text, *Cmd+C* to copy the content of the text file, then move to the browser, copy the query into the **neo4j$** prompt and run it by *Cmd+Enter*. Wait for a few minutes. When you see all the checkboxes are green-checked, then it is done (anything else can be trouble.)
@@ -259,7 +259,7 @@ You should see the result starts with something similar as below,
     "nodeCount": 40886,
     "relCount": 275835,
 
-### Data Mining Cases
+### D. Data Mining Cases
 Starts the *neodash* docker by
 
     docker-compose up -d neodash
@@ -272,7 +272,9 @@ Follow the instructions on the dashboard.
 
 After loading, you can click on the *Save Dashboard* to save it to Neo4j.
 
-### Reprocessing a a few xhtml document
+### E. Refactorings
+
+#### E.1 Reprocessing a a few xhtml document
 First, for each document, for example *11-HCAA-CA4-01139_Authorization.xhtml* you need to reprocess by running:
 
     docker-compose run --rm doc_processor 11-HCAA-CA4-01139_Authorization.xhtml
@@ -292,7 +294,7 @@ and then clean up Neo4j with queries,
 
 and then import the json data into Neo4j as described above.
 
-### Define new or modify existing named entities
+#### E.2 Define new or modify existing named entities
 If you define new or modify existing named entities (in *conf/regexner.mappings*), then you need to rerun the NLP processing:
 
     docker-compose stop stanford_nlp
