@@ -12,7 +12,24 @@ MERGE (n:DM3)
     SET 
         n.loc_terms = apoc.convert.toJson(custom.run_nlp(loc_terms, stanford_url, nltk_url))
 RETURN
-    apoc.convert.fromJsonList(n.loc_terms) AS dm3_terms;
+    apoc.convert.fromJsonList(n.loc_terms) AS number_of_terms;
+//
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+// PoC Case 3: Demonstrate 
+//
+WITH
+    [
+        '14-HCAA-00225',
+        '14-HCAA-01139',
+        '14-HCAA-00258',
+        '17-HCAA-01168'
+    ] AS path_uid_list
+MERGE (n:DM3)
+    SET n.path_uid_list = path_uid_list
+RETURN SIZE(path_uid_list) AS number_of_paths;
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -50,14 +67,10 @@ RETURN doc, sentence;
 MATCH (n:DM3)
 WITH 
     apoc.convert.fromJsonList(n.loc_terms) AS dm3_terms,
-    [
-        '14-HCAA-00225',
-        '14-HCAA-00258',
-        '14-HCAA-01139',
-        '17-HCAA-01168'
-    ] AS path_uid_list
+    n.path_uid_list AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
-        WHERE doc.uid IN path_uid_list AND r.item STARTS WITH '4.'
+        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND 
+            r.item STARTS WITH '4.'
 WITH dm3_terms, doc, sentence
     MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
 WITH dm3_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words

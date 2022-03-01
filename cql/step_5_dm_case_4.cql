@@ -97,9 +97,33 @@ MERGE (n:DM4)
         n.goals = apoc.convert.toJson(custom.run_nlp(goals, stanford_url, nltk_url)),
         n.actions = apoc.convert.toJson(custom.run_nlp(actions, stanford_url, nltk_url))
 RETURN
-    apoc.convert.fromJsonList(n.objects) AS dm4_objects,
-    apoc.convert.fromJsonList(n.goals) AS dm4_goals,
-    apoc.convert.fromJsonList(n.goals) AS dm4_actions;
+    SIZE(apoc.convert.fromJsonList(n.objects)) AS number_of__objects,
+    SIZE(apoc.convert.fromJsonList(n.goals)) AS number_of_goals,
+    SIZE(apoc.convert.fromJsonList(n.goals)) AS number_of_actions;
+//
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+//
+// PoC Case 4: Demonstrate 
+//
+WITH
+    [
+        '13-HCAA-CA1-00850',
+        '13-HCAA-CA1-00891',
+        '14-HCAA-00225',
+        '14-HCAA-00258',
+        '14-HCAA-01139',
+        '15-HCAA-00124',
+        '15-HCAA-00279',
+        '15-HCAA-01013',
+        '16-HCAA-01202',
+        '16-HCAA-01206',
+        '17-HCAA-01168'
+    ] AS path_uid_list
+MERGE (n:DM4)
+    SET n.path_uid_list = path_uid_list
+RETURN SIZE(path_uid_list) AS number_of_paths;
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -114,23 +138,11 @@ RETURN
 //      if absent then use the first bullet before the next bullet at the same level with (i)
 // - extract all bullets between (ii) (inclusive) and (iii) (exclusive).
 //
-WITH 
-    [
-        '13-HCAA-CA1-00850',
-        '13-HCAA-CA1-00891',
-        '14-HCAA-00225',
-        '14-HCAA-00258',
-        '14-HCAA-01139',
-        '15-HCAA-00124',
-        '15-HCAA-00279',
-        '15-HCAA-01013',
-        '16-HCAA-01202',
-        '16-HCAA-01206',
-        '17-HCAA-01168'
-    ] AS path_uid_list
+MATCH (n:DM4)
+WITH
+    n.path_uid_list AS path_uid_list
 MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
-    WHERE 
-        doc.uid IN path_uid_list AND
+    WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND 
         s.text =~ 'Conditions\\s+that\\s+relate\\s+to(\\s+the)?\\s+(compensation|(habitat\\s+)?offsett?ing)(\\s+(for|of)(\\s+the\\s+serious\\s+(b|h)arm\\s+to\\s+(f|F)ish(\\s+and\\s+impacts\\s+(on|to)\\s+aquatic\\s+species\\s+at\\s+risk)?\\s+likely\\s+to\\s+result\\s+from)?\\s+the\\s+authorized\\s+work,\\s+undertaking\\s+or\\s+activity(\\s+that\\s+results\\s+in\\s+impacts\\s+to\\s+fish(\\s+and\\s+fish)?\\s+habitat)?)?\\:?'
 WITH doc, r.item AS ri
     MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
@@ -159,7 +171,9 @@ WITH doc, r1, r2,
             REDUCE(r = [], e IN rc | CASE e >= r1 AND e < r2  WHEN TRUE THEN r + [e] ELSE r END)
     END AS rc
 WITH doc, rc
-    SET doc.dm4_rc = rc;
+    SET doc.dm4_rc = rc
+RETURN
+    COUNT(doc) AS number_of_authorizations;
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -175,21 +189,10 @@ WITH
     apoc.convert.fromJsonList(n.objects) AS dm4_objects,
     apoc.convert.fromJsonList(n.goals) AS dm4_goals,
     apoc.convert.fromJsonList(n.goals) AS dm4_actions,
-    [
-        '13-HCAA-CA1-00850',
-        '13-HCAA-CA1-00891',
-        '14-HCAA-00225',
-        '14-HCAA-00258',
-        '14-HCAA-01139',
-        '15-HCAA-00124',
-        '15-HCAA-00279',
-        '15-HCAA-01013',
-        '16-HCAA-01202',
-        '16-HCAA-01206',
-        '17-HCAA-01168'
-    ] AS path_uid_list
+    n.path_uid_list AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
-        WHERE doc.uid IN path_uid_list AND r.item IN doc.dm4_rc
+        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND 
+            r.item IN doc.dm4_rc
 WITH dm4_objects, dm4_goals, dm4_actions, doc, sentence ORDER BY doc.uid ASC, r.i ASC
     MATCH (sentence)-[:HAS_KEY_PHRASE]->(:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
 WITH dm4_objects, dm4_goals, dm4_actions, doc, sentence,

@@ -1,10 +1,11 @@
 {
-  "title": "Data Mining Proof-of-Concept for Program Activity Tracking for Habitat (PATH)",
+  "title": "",
   "version": "2.0",
   "settings": {
-    "pagenumber": 0,
+    "pagenumber": 5,
     "editable": true,
-    "fullscreenEnabled": true
+    "fullscreenEnabled": true,
+    "queryTimeLimit": 30
   },
   "pages": [
     {
@@ -12,7 +13,7 @@
       "reports": [
         {
           "title": "Neo4j",
-          "query": "CALL dbms.components()\n  YIELD name, versions, edition\nUNWIND versions AS version\nRETURN name, version, edition\nUNION\nRETURN 'APOC Library' AS name, apoc.version() AS version, '' AS edition\nUNION\nRETURN 'GDS Library' AS name, gds.version() as version, '' AS edition",
+          "query": "CALL dbms.components()\n  YIELD name, versions, edition\nUNWIND versions AS version\nRETURN name, version, edition\nUNION \nRETURN \"APOC\" AS name, apoc.version() AS version, \"\" AS edition\nUNION \nRETURN \"GDS\" AS name, gds.version() AS version, \"\" AS edition;\n\n\n",
           "width": "4",
           "type": "table",
           "height": "3",
@@ -21,184 +22,210 @@
         },
         {
           "title": "Nodes",
-          "query": "MATCH (n)\n  RETURN DISTINCT(LABELS(n)) AS node_label, COUNT(n) AS count\n    ORDER BY node_label, count DESC;\n\n\n",
+          "query": "MATCH (n)\n  RETURN DISTINCT(LABELS(n)) AS node_label, COUNT(n) AS count\n    ORDER BY node_label, count DESC;\n\n\n\n",
           "width": "4",
           "type": "table",
           "height": "3",
-          "selection": {},
-          "settings": {
-            "columnWidths": "[35,5]"
-          }
-        },
-        {
-          "title": "Relationships",
-          "query": "MATCH (s)-[r]->(e)\n  RETURN DISTINCT([LABELS(s)[0], [l IN LABELS(e) WHERE l <> 'NAMED_ENTITY' | l][0]]) AS rel_type, COUNT(r) AS count\n    ORDER BY rel_type, count DESC;\n\n\n\n",
-          "width": "4",
-          "type": "table",
-          "height": "3",
-          "selection": {},
-          "settings": {
-            "columnWidths": "[35,5]"
-          }
-        },
-        {
-          "title": "Meta Graph",
-          "query": "CALL apoc.meta.graph()\n\n\n",
-          "width": "12",
-          "type": "graph",
-          "height": "6",
-          "selection": {
-            "DM1": "name",
-            "DM2": "name",
-            "FOOT_PRINT": "name",
-            "KEY_PHRASE": "name",
-            "NAMED_ENTITY": "name",
-            "NE_CAUSE_OF_DEATH": "name",
-            "NE_CITY": "name",
-            "NE_COUNTRY": "name",
-            "NE_CRIMINAL_CHARGE": "name",
-            "NE_DATE": "name",
-            "NE_DURATION": "name",
-            "NE_IDEOLOGY": "name",
-            "NE_LOCATION": "name",
-            "NE_MISC": "name",
-            "NE_MONEY": "name",
-            "NE_NATIONALITY": "name",
-            "NE_NUMBER": "name",
-            "NE_ORDINAL": "name",
-            "NE_ORGANIZATION": "name",
-            "NE_PERCENT": "name",
-            "NE_PERSON": "name",
-            "NE_RELIGION": "name",
-            "NE_SET": "name",
-            "NE_STATE_OR_PROVINCE": "name",
-            "NE_TIME": "name",
-            "NE_TITLE": "name",
-            "NE_URL": "name",
-            "PATH": "name",
-            "SENTENCE": "name",
-            "WORD": "name",
-            "_Neodash_Dashboard": "name"
-          },
-          "settings": {
-            "nodePositions": {}
-          }
-        }
-      ]
-    },
-    {
-      "title": "Data Mining Cases",
-      "reports": [
-        {
-          "title": "Case 1: Find Footprints",
-          "query": "Look for authorizations,\n- with identifications are **17-HCAA-01501**, **17-HCAA-01357**, **17-HCAA-01169**, **16-HCAA-00219**, **17-HCAA-00176**, **15-HCAA-01305**, **14-HCAA-00498**, **16-HCAA-00582**, **17-HCAA-00086**, **17-HCAA-00033**, **18-HCAA-01357**, **17-HCAA-01438**, **17-HCAA-00066**, **17-HCAA-00058**, **17-HCAA-00009**, **16-HCAA-01754**, **16-HCAA-01734**, **16-HCAA-01736**, **16-HCAA-01612**, **16-HCAA-01721**, **17-HCAA-01168**, **17-HCAA-01046**, **14-HCAA-01999**, **14-HCAA-01998**, **14-HCAA-00904**, **14-HCAA-00932**, **14-HCAA-00902**, **14-HCAA-00292**, **17-HCAA-00985**, **17-HCAA-01087**, **17-HCAA-00808**, **17-HCAA-00940**, **17-HCAA-00961**, **17-HCAA-00963**, **15-HCAA-01266**, **18-HCAA-01381**, **18-HCAA-01379**, **18-HCAA-01287**, **18-HCAA-01235**, **18-HCAA-00950**, **18-HCAA-00808**, **18-HCAA-00852**. (This can be changed by the parameter *path_uid*.)\n- has sections (in relations of serious harm to fish) of the description containing at least one of the terms **permanent alteration**, **harmful alteration**, **disruption**, **death of fish**, **temporary alteration**, or **permanent destruction**. (This can be change by the parameter *phrases*).\n- has a foot print, e.g. *50 m2* or *30 ha*, in the same sentence where a specific term, as above, found.\n- extrating the reasons from the sentences if they match given reasons: **dredging**, **rip rap**, **riprap**, **re-sloping**, **piles**,  **realignment**,  **culvert**, **rock fill**, **fill**, **pier**, **instream pier**, **in-stream pier**, **abutment**, **berms**, **armouring**, **concrete pipe**, **extension**, **channel realignment**, **temporary infilling**, **coffer dam**, **cofferdam**, **placement of sand**, **spur**, **bank protection**, **hydraulic impact**, **dewatering**, **changes to flow**, **incidental**, **channel deepening**, **causeway**, and **construction**. (This can be changed by the *reasons* parameter.)",
-          "width": "8",
-          "type": "text",
-          "height": "3",
-          "selection": {},
-          "settings": {
-            "columnWidths": "[10, 5, 50]"
-          },
-          "parameters": ""
-        },
-        {
-          "title": "Case 1: Set parameters",
-          "query": "MERGE (n:DM1)\n    SET \n        n.dm1_impacts = apoc.convert.toJson(custom.extract_terms($dm1_impacts, $nlp_url)),\n        n.dm1_reasons = apoc.convert.toJson(custom.extract_terms($dm1_reasons, $nlp_url)),\n        n.dm1_path_uid_list = apoc.convert.toJson($dm1_path_uid_list),\n        n.dm1_path_section = 'd',\n        n.dm1_path_not_item = 'proj'\nRETURN SIZE(apoc.convert.fromJsonList(n.dm1_impacts)) AS impacts, SIZE(apoc.convert.fromJsonList(n.dm1_reasons)) AS reasons, SIZE(apoc.convert.fromJsonList(n.dm1_path_uid_list)) AS paths, n.dm1_path_section AS section, n.dm1_path_not_item AS not_item",
-          "width": "4",
-          "type": "table",
-          "height": "3",
-          "selection": {},
-          "settings": {},
-          "parameters": "{\"dm1_impacts\": [\"permanent alteration\", \"harmful alteration\", \"disruption\", \"death of fish\", \"temporary alteration\", \"permanent destruction\"],  \"dm1_reasons\": [\"dredging\", \"rip rap\", \"riprap\", \"re-sloping\", \"piles\",  \"realignment\",  \"culvert\", \"rock fill\", \"fill\", \"pier\", \"instream pier\", \"in-stream pier\", \"abutment\", \"berms\", \"armouring\", \"concrete pipe\", \"extension\", \"channel realignment\", \"temporary infilling\", \"coffer dam\", \"cofferdam\", \"placement of sand\", \"spur\", \"bank protection\", \"hydraulic impact\", \"dewatering\", \"changes to flow\", \"incidental\", \"channel deepening\", \"causeway\", \"construction\"], \"dm1_path_uid_list\": [\"17-HCAA-01501\", \"17-HCAA-01357\", \"17-HCAA-01169\", \"16-HCAA-00219\", \"17-HCAA-00176\", \"15-HCAA-01305\", \"14-HCAA-00498\", \"16-HCAA-00582\", \"17-HCAA-00086\", \"17-HCAA-00033\", \"18-HCAA-01357\", \"17-HCAA-01438\", \"17-HCAA-00066\", \"17-HCAA-00058\", \"17-HCAA-00009\", \"16-HCAA-01754\", \"16-HCAA-01734\", \"16-HCAA-01736\", \"16-HCAA-01612\", \"16-HCAA-01721\", \"17-HCAA-01168\", \"17-HCAA-01046\", \"14-HCAA-01999\", \"14-HCAA-01998\", \"14-HCAA-00904\", \"14-HCAA-00932\", \"14-HCAA-00902\", \"14-HCAA-00292\", \"17-HCAA-00985\", \"17-HCAA-01087\", \"17-HCAA-00808\", \"17-HCAA-00940\", \"17-HCAA-00961\", \"17-HCAA-00963\", \"15-HCAA-01266\", \"18-HCAA-01381\", \"18-HCAA-01379\", \"18-HCAA-01287\", \"18-HCAA-01235\", \"18-HCAA-00950\", \"18-HCAA-00808\", \"18-HCAA-00852\"], \"dm1_path_section\": \"d\", \"dm1_path_not_item\": \"proj\", \"nlp_url\": \"http://stanford_nlp:9000/?properties={'outputFormat':'json'}\"}"
-        },
-        {
-          "title": "Case 2: Dates extraction",
-          "query": "Extracting dates (and time-related entities) from section 5 of each given authorization.",
-          "width": "8",
-          "type": "text",
-          "height": "3",
-          "selection": {},
-          "settings": {
-            "columnWidths": "[10, 5, 50]"
-          },
-          "parameters": ""
-        },
-        {
-          "title": "Case 2: Set parameters",
-          "query": "MERGE (n:DM2)\n    SET \n        n.dm2_doc_uid = $dm2_doc_uid,\n        n.dm_2_doc_section = $dm_2_doc_section,\n        n.dm2_doc_section_item = $dm2_doc_section_item\nRETURN n.dm2_doc_uid AS uid_starts_with, n.dm_2_doc_section AS path_section, n.dm2_doc_section_item AS item",
-          "width": "4",
-          "type": "table",
-          "height": "3",
-          "selection": {},
-          "settings": {
-            "columnWidths": "[15,15,15]"
-          },
-          "parameters": "{\"dm2_doc_uid\": \"17\", \"dm_2_doc_section\": \"c\", \"dm2_doc_section_item\": \"5.\"}"
-        }
-      ]
-    },
-    {
-      "title": "Case 1: Find Footprints",
-      "reports": [
-        {
-          "title": "Total",
-          "query": "MATCH (n:DM1)\nWITH apoc.convert.fromJsonList(n.dm1_impacts) AS impacts, apoc.convert.fromJsonList(n.dm1_reasons) AS reasons, apoc.convert.fromJsonList(n.dm1_path_uid_list) AS path_uid_list, n.dm1_path_section AS path_section, n.dm1_path_not_item AS path_not_item\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: path_section}]-(sentence:SENTENCE)\n        WHERE doc.uid IN path_uid_list AND r.item <> path_not_item\nWITH impacts, reasons, doc, sentence \n    MATCH (sentence)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT),\n    (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD),\n    (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)\nWITH impacts, reasons, doc, sentence, foot_print, key_phrase, reason_phrase,\n    COLLECT(kword.lemma) AS kwords, COLLECT(rword.lemma) AS rwords\n    WHERE ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term))\n    AND ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))\nRETURN COUNT(DISTINCT(doc))",
-          "width": 3,
-          "type": "value",
-          "height": 3,
-          "selection": {},
-          "settings": {},
-          "parameters": "{}"
-        },
-        {
-          "title": "Foot prints and terms",
-          "query": "MATCH (n:DM1)\nWITH apoc.convert.fromJsonList(n.dm1_impacts) AS impacts, apoc.convert.fromJsonList(n.dm1_reasons) AS reasons, apoc.convert.fromJsonList(n.dm1_path_uid_list) AS path_uid_list, n.dm1_path_section AS path_section, n.dm1_path_not_item AS path_not_item\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: path_section}]-(sentence:SENTENCE)\n        WHERE doc.uid IN path_uid_list AND r.item <> path_not_item\nWITH impacts, reasons, doc, sentence \n    MATCH (sentence)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT),\n    (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD),\n    (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)\nWITH impacts, reasons, doc, sentence, foot_print, key_phrase, reason_phrase,\n    COLLECT(kword.lemma) AS kwords, COLLECT(rword.lemma) AS rwords\n    WHERE ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term))\n    AND ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))\nRETURN doc.uid, sentence.text AS sentence, foot_print.text AS foot_print,\n    COLLECT(DISTINCT(key_phrase.text)) AS key_phrases, COLLECT(DISTINCT(reason_phrase.text)) AS reason_phrases",
-          "width": "9",
-          "type": "table",
-          "height": "6",
-          "selection": {},
-          "settings": {
-            "columnWidths": "[5, 20, 15, 20, 20]"
-          },
-          "parameters": "{}"
-        },
-        {
-          "title": "Project Locations",
-          "query": "MATCH (n:DM1)\nWITH apoc.convert.fromJsonList(n.dm1_impacts) AS impacts, apoc.convert.fromJsonList(n.dm1_reasons) AS reasons, apoc.convert.fromJsonList(n.dm1_path_uid_list) AS path_uid_list, n.dm1_path_section AS path_section, n.dm1_path_not_item AS path_not_item\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: path_section}]-(sentence:SENTENCE)\n        WHERE doc.uid IN path_uid_list AND r.item <> path_not_item\nWITH impacts, reasons, doc, sentence \n    MATCH (sentence)-[:HAS_FOOT_PRINT]->(foot_print:FOOT_PRINT),\n    (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(kword:WORD),\n    (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)\nWITH impacts, reasons, doc, sentence, foot_print, key_phrase, reason_phrase,\n    COLLECT(kword.lemma) AS kwords, COLLECT(rword.lemma) AS rwords\n    WHERE ANY(term IN impacts WHERE apoc.coll.containsAll(kwords, term))\n    AND ANY(term IN reasons WHERE apoc.coll.containsAll(rwords, term))\nRETURN DISTINCT(doc) AS doc\n\n\n",
-          "width": "12",
-          "type": "map",
-          "height": "6",
-          "selection": {
-            "PATH": "project_nearest_community"
-          },
-          "settings": {},
-          "parameters": "{}"
-        }
-      ]
-    },
-    {
-      "title": "Case 2: Date extractions",
-      "reports": [
-        {
-          "title": "Total",
-          "query": "MATCH (n:DM2)\nWITH n.dm2_doc_uid AS dm2_doc_uid, n.dm_2_doc_section AS dm2_doc_section, n.dm2_doc_section_item AS dm2_doc_section_item\nMATCH (doc:PATH)-[r:HAS_SENTENCE {section: dm2_doc_section}]-(sentence:SENTENCE)\n    WHERE doc.uid STARTS WITH dm2_doc_uid AND r.item STARTS WITH dm2_doc_section_item\nWITH doc, sentence, r.item AS item\n    MATCH (sentence)-[:HAS_NAMED_ENTITY]->(date:NE_DATE)\nRETURN COUNT(DISTINCT(doc.uid))\n\n\n\n\n",
-          "width": 3,
-          "type": "value",
-          "height": 3,
           "selection": {},
           "settings": {}
         },
         {
-          "title": "Dates extracted from section 5",
-          "query": "MATCH (n:DM2)\nWITH n.dm2_doc_uid AS dm2_doc_uid, n.dm_2_doc_section AS dm2_doc_section, n.dm2_doc_section_item AS dm2_doc_section_item\nMATCH (doc:PATH)-[r:HAS_SENTENCE {section: dm2_doc_section}]-(sentence:SENTENCE)\n    WHERE doc.uid STARTS WITH dm2_doc_uid AND r.item STARTS WITH dm2_doc_section_item\nWITH doc, sentence, r.item AS item\n    MATCH (sentence)-[:HAS_NAMED_ENTITY]->(date:NE_DATE)\nWITH doc, item, COLLECT(date.text) AS dates\nRETURN doc.uid AS doc_uid, item, dates ORDER BY doc_uid, item ASC;\n",
-          "width": "9",
+          "title": "Relationships",
+          "query": "MATCH (s)-[r]->(e)\n  RETURN DISTINCT(TYPE(r)) AS rel_type, COUNT(r) AS count\n    ORDER BY rel_type, count DESC;\n\n\n\n",
+          "width": "4",
           "type": "table",
           "height": "3",
           "selection": {},
-          "settings": {
-            "columnWidths": "[10,5,50]"
-          },
-          "parameters": ""
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 1 - Input",
+      "reports": [
+        {
+          "title": "Serious harm to fish: look for impacts and reasons if there is a footprint",
+          "query": "Looking a:\n- section **Description**,\n- paragraph **serious harm to fish**, started with the sentence specified by the regular expression: *The\\s+serious\\s+harm\\s+to\\s+fish\\s+(and\\s+impacts\\s+to\\s+aquatic\\s+species\\s+at\\s+risk\\s+)?likely\\s+to\\s+result\\s+from\\s+the\\s+proposed\\s+work(s|\\(s\\))?\\,\\s+undertaking(s|\\(s\\))?\\,\\s?or\\s+activit(ies|y(\\(ies\\))?)?\\,\\s?and\\s+covered\\s+by\\s+this\\s+authorization\\s+(includes|are)(\\;|\\:)?*,\n- detects if there is any **foot prints** such as *12 m2*,\n- extract terms matched **impacts**, such as *death of fish, destruction, disruption, harmful alteration, kill, loss, permanent alteration, permanent destruction, temporary alteration*\n- or matches **reasons**, such as *abutment, armouring, bank protection, berms, causeway, changes to flow, channel deepening, channel realignment, coffer dam, cofferdam, concrete pipe, construction, culvert, dewatering, dredging, entrainment, extension, fill, hydraulic impact, impingement, in-stream pier, incidental, infilling, instream pier, pier, piles, placement of sand, re-sloping, realignment, rip rap, riprap, rock fill, shoreline protection, spur, temporary infilling*\n\n",
+          "width": "12",
+          "type": "text",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "What impact and reason terms?",
+          "query": "WITH\n    [\n        \"death of fish\", \n        \"destruction\",\n        \"disruption\", \n        \"harmful alteration\", \n        \"kill\",\n        \"loss\",\n        \"permanent alteration\", \n        \"permanent destruction\",\n        \"temporary alteration\"\n    ] AS impacts,\n    [\n        \"abutment\",\n        \"armouring\",\n        \"bank protection\",\n        \"berms\",\n        \"causeway\",\n        \"changes to flow\",\n        \"channel deepening\",\n        \"channel realignment\",\n        \"coffer dam\",\n        \"cofferdam\",\n        \"concrete pipe\",\n        \"construction\",\n        \"culvert\",\n        \"dewatering\",\n        \"dredging\",\n        \"entrainment\",\n        \"extension\",\n        \"fill\",\n        \"hydraulic impact\",\n        \"impingement\",\n        \"in-stream pier\",\n        \"incidental\",\n        \"infilling\",\n        \"instream pier\",\n        \"pier\",\n        \"piles\", \n        \"placement of sand\",\n        \"re-sloping\",\n        \"realignment\",\n        \"rip rap\",\n        \"riprap\",\n        \"rock fill\",\n        \"shoreline protection\",\n        \"spur\",\n        \"temporary infilling\"\n    ] AS reasons,\n    \"http://stanford_nlp:9000/?properties={'outputFormat':'json'}\"  AS stanford_url,\n    \"http://nltk_nlp:6543/stem\"  AS nltk_url\nMERGE (n:DM1)\n    SET \n        n.impacts = apoc.convert.toJson(custom.run_nlp(impacts, stanford_url, nltk_url)),\n        n.reasons = apoc.convert.toJson(custom.run_nlp(reasons, stanford_url, nltk_url))\nRETURN \n    SIZE(apoc.convert.fromJsonList(n.impacts)) AS number_of_impact_terms,\n    SIZE(apoc.convert.fromJsonList(n.reasons)) AS number_of_reason_terms;\n\n\n\n\n",
+          "width": "6",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Which authorization?",
+          "query": "WITH\n    [\n        '14-HCAA-00225',\n        '14-HCAA-01139',\n        '14-HCAA-00258',\n        '17-HCAA-01168'\n    ] AS path_uid_list\nMERGE (n:DM1)\n    SET n.path_uid_list = path_uid_list\nRETURN SIZE(path_uid_list) AS number_of_paths;",
+          "width": "4",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 1 - Output",
+      "reports": [
+        {
+          "title": "Executing query",
+          "query": "MATCH (n:DM1)\nWITH \n    apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,\n    apoc.convert.fromJsonList(n.reasons) AS dm1_reasons,\n    n.path_uid_list AS path_uid_list\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_NAMED_ENTITY]->(foot_print:NE_FOOTPRINT)\n        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND \n\t\t\tr.item = 'impact_harm'\nWITH dm1_impacts, dm1_reasons, doc, sentence, foot_print\n    MATCH\n        (sentence)-[:HAS_KEY_PHRASE]->(impact_phrase:KEY_PHRASE)-[:HAS_WORD]->(iword:WORD),\n        (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)\n    WHERE impact_phrase <> reason_phrase\nWITH dm1_impacts, dm1_reasons, doc, sentence, foot_print, \n    COLLECT(DISTINCT(iword.stem)) AS iwords, COLLECT(DISTINCT(rword.stem)) AS rwords\n    WHERE\n        ANY(term IN dm1_impacts WHERE apoc.coll.containsAll(iwords, [e IN term | e[0]])) AND\n        ANY(term IN dm1_reasons WHERE apoc.coll.containsAll(rwords, [e IN term | e[0]]))\nWITH dm1_impacts, dm1_reasons, doc, sentence, foot_print, \n    COLLECT(DISTINCT(iwords)) AS impact_phrases,\n    COLLECT(DISTINCT(rwords)) AS reason_phrases\nWITH dm1_impacts, dm1_reasons, doc, sentence, foot_print, \n    REDUCE(r = [], term IN dm1_impacts | \n        CASE ANY(phrase IN impact_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS impact_phrases,\n    REDUCE(r = [], term IN dm1_reasons | \n        CASE ANY(phrase IN reason_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS reason_phrases\n WITH\n    [\n        'NE_LOCATION', \n        'NE_ORGANIZATION', \n        'NE_PERSON', \n        'NE_TITLE',\n        'NE_BUILDING',\n        'NE_ECOLOGY',\n        'NE_WATERBODY'\n    ] AS entity_types,\n    doc, sentence, foot_print, impact_phrases, reason_phrases\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity)\n        WHERE SIZE(apoc.coll.intersection(entity_types, LABELS(entity))) > 0\nWITH\n    doc, sentence, foot_print, impact_phrases, reason_phrases,\n    COLLECT(DISTINCT(entity.text)) AS named_entities\nRETURN\n    doc.uid AS path_uid, COLLECT(DISTINCT(foot_print.text)) AS foot_prints, \n    COLLECT(DISTINCT(impact_phrases)) AS impact_phrases, \n    COLLECT(DISTINCT(reason_phrases)) AS reason_phrases,\n    COLLECT(DISTINCT(named_entities)) AS named_entities,\n    sentence.text AS sentence;\n\n\n\n",
+          "width": "12",
+          "type": "table",
+          "height": "6",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 2 - Input",
+      "reports": [
+        {
+          "title": "Extracting Date of Issuance",
+          "query": "Looking at:\n- section **Conditions of Authorizations**,\n- paragraph **1.**,\n- detects the period of validity of the authorization, such as *From: Date of Issuance To: April 15, 2018* and extracts the dates.\n\n\n\n",
+          "width": "8",
+          "type": "text",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Which authorizations?",
+          "query": "WITH\n    [\n\t\t'14-HCAA-00225',\n        '14-HCAA-01139',\n        '14-HCAA-00258',\n        '17-HCAA-01168'        \n    ] AS path_uid_list\nMERGE (n:DM2)\n    SET n.path_uid_list = path_uid_list\nRETURN SIZE(path_uid_list) AS number_of_paths;\n\n\n",
+          "width": "4",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 2 - Output",
+      "reports": [
+        {
+          "title": "Executing query",
+          "query": "MATCH (n:DM2)\nWITH \n    n.path_uid_list AS path_uid_list\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c', item: '1.'}]-(sentence:SENTENCE)\n        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END  \nWITH doc, sentence\n    MATCH (sentence)-[:HAS_NAMED_ENTITY]->(date:NE_DATE)\nWITH doc, sentence, COLLECT(DISTINCT(date.text)) AS dates\nWITH doc, sentence, \n    CASE SIZE(dates) = 0 \n        WHEN TRUE THEN ['', ''] \n        ELSE \n            CASE SIZE(dates) = 1 \n                WHEN TRUE THEN ['Date of Issuance', dates[0]]\n                ELSE [dates[0], dates[1]] END\n        END AS dates\nRETURN doc.uid AS path_uid, dates[0] AS from, dates[1] AS to, sentence.text AS sentence;\n\n",
+          "width": "12",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 3 - Input",
+      "reports": [
+        {
+          "title": "Extracting value for Letter of Credit",
+          "query": "Looking at:\n- section **Conditions of Authorizations**,\n- paragraphs start with **4.**,\n- detects the phrase **Letter of Credit**\n- extracts any **MONEY** named entity (if any), or return the whole sentence.\n\n\n\n\n\n\n\n",
+          "width": "6",
+          "type": "text",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Which terms?",
+          "query": "WITH\n    [\n        \"letter of credit\"\n    ] AS loc_terms,\n    \"http://stanford_nlp:9000/?properties={'outputFormat':'json'}\"  AS stanford_url,\n    \"http://nltk_nlp:6543/stem\"  AS nltk_url\nMERGE (n:DM3)\n    SET \n        n.loc_terms = apoc.convert.toJson(custom.run_nlp(loc_terms, stanford_url, nltk_url))\nRETURN\n    SIZE(apoc.convert.fromJsonList(n.loc_terms)) AS number_of_terms;\n\n\n\n",
+          "width": "3",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Which authorizations?",
+          "query": "WITH\n    [\n        '14-HCAA-00225',\n        '14-HCAA-01139',\n        '14-HCAA-00258',\n        '17-HCAA-01168'\n\n    ] AS path_uid_list\nMERGE (n:DM3)\n    SET n.path_uid_list = path_uid_list\nRETURN SIZE(path_uid_list) AS number_of_paths;\n\n\n",
+          "width": "3",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 3 - Output",
+      "reports": [
+        {
+          "title": "Executing query",
+          "query": "MATCH (n:DM3)\nWITH \n    apoc.convert.fromJsonList(n.loc_terms) AS dm3_terms,\n    n.path_uid_list AS path_uid_list\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)\n        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND \n            r.item STARTS WITH '4.'\nWITH dm3_terms, doc, sentence\n    MATCH (sentence)-[:HAS_KEY_PHRASE]->(loc_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)\nWITH dm3_terms, doc, sentence, COLLECT(DISTINCT(word.stem)) AS words\n    WHERE ANY(term IN dm3_terms WHERE apoc.coll.containsAll(words, [e IN term | e[0]]))\nWITH doc, sentence\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_MONEY)\nWITH doc, sentence, COLLECT(DISTINCT(entity.text)) AS credits\nWITH doc, sentence, credits,\n    CASE SIZE(credits) = 0  WHEN TRUE THEN sentence.text ELSE credits[0] END AS credit\nRETURN doc.uid AS path_uid, credit, sentence.text AS sentence;\n\n",
+          "width": "12",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 4 - Input",
+      "reports": [
+        {
+          "title": "Extract offsetting measures",
+          "query": "Looking at:\n- section **Conditions of Authorizations**,\n- paragraphs start with regular expression **Scale\\\\s+and\\\\s+description\\\\s+of\\\\s+offsetting\\\\s+measures**, and end before **Contingency\\\\s+measures**\n- detects the sentence having **goals**, **actions**, **objects**, **footprints**, or **specific named entities**\n\n\n\n\n\n\n\n\n\n\n",
+          "width": "6",
+          "type": "text",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Which terms?",
+          "query": "WITH\n    [\n        \"anchored tree root wads\",\n        \"baseline measurements\",\n        \"boulder bench\",\n        \"channels\",\n        \"clean large boulders\",\n        \"clean rock\",\n        \"concrete box culverts\",\n        \"discussions\",\n        \"embedded woody habitat structure\",\n        \"existing bottom substrate\",\n        \"fish habitat biologist\",\n        \"fish habitat features\",\n        \"Indigenous community\",\n        \"Indigenous nation\",\n        \"live brush layering\",\n        \"monitoring program\",\n        \"monitoring\",\n        \"new culverts\",\n        \"new stream channel\",\n        \"offsetting measures\",\n        \"offsetting plan\",\n        \"open water ponds\",\n        \"post-construction fish habitat conditions\",\n        \"riffle rock sections\",\n        \"riverbed dredged\",\n        \"rock reefs\",\n        \"rock revetment treatments\",\n        \"spawning habitat\",\n        \"stream morphological features\",\n        \"substrate composition\",\n        \"vegetated rip rap\",\n        \"Vegetation\",\n        \"water depths\"\n    ] AS objects,\n    [\n        \"armouring of culvert inlets\",\n        \"assist in the placement\",\n        \"backwater pools and flats\",\n        \"bank stability\",\n        \"baseline measurements of fish habitat present\",\n        \"cover and diversity\",\n        \"create artificial spawning areas\",\n        \"extent of HADD\",\n        \"food production\",\n        \"food supply\",\n        \"habitat diversity\",\n        \"improved fish passage\",\n        \"in-stream cover\",\n        \"increase the abundance of invertebrates\",\n        \"increase the diversity of invertebrates\",\n        \"increase the quality of invertebrates\",\n        \"increase the overall understanding of aquatic ecology\",\n        \"invertebrate food production\",\n        \"nearshore habitat features\",\n        \"provide food production habitat\",\n        \"riffle condition \",\n        \"increase the diversity of cover habitats\",\n        \"substrate diversity \"\n    ] AS goals,\n    [\n        \"be onsite\",\n        \"conduct\",\n        \"confirm\",\n        \"construct\",\n        \"construction\",\n        \"create\",\n        \"creation\",\n        \"complete\",\n        \"determining\",\n        \"develop\",\n        \"engage\",\n        \"enhancement\",\n        \"establish\",\n        \"implement\",\n        \"implement\",\n        \"incorporation\",\n        \"install\",\n        \"installation\",\n        \"place\",\n        \"reconstruction\",\n        \"removal\",\n        \"report\",\n        \"undertake\",\n        \"verify\"\n    ] AS actions,\n    \"http://stanford_nlp:9000/?properties={'outputFormat':'json'}\"  AS stanford_url,\n    \"http://nltk_nlp:6543/stem\"  AS nltk_url\nMERGE (n:DM4)\n    SET \n        n.objects = apoc.convert.toJson(custom.run_nlp(objects, stanford_url, nltk_url)),\n        n.goals = apoc.convert.toJson(custom.run_nlp(goals, stanford_url, nltk_url)),\n        n.actions = apoc.convert.toJson(custom.run_nlp(actions, stanford_url, nltk_url))\nRETURN\n    SIZE(apoc.convert.fromJsonList(n.objects)) AS number_of__objects,\n    SIZE(apoc.convert.fromJsonList(n.goals)) AS number_of_goals,\n    SIZE(apoc.convert.fromJsonList(n.goals)) AS number_of_actions;\n\n\n",
+          "width": "3",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Which authorizations?",
+          "query": "WITH\n    [\n        '13-HCAA-CA1-00850',\n        '13-HCAA-CA1-00891',\n        '14-HCAA-00225',\n        '14-HCAA-00258',\n        '14-HCAA-01139',\n        '15-HCAA-00124',\n        '15-HCAA-00279',\n        '15-HCAA-01013',\n        '16-HCAA-01202',\n        '16-HCAA-01206',\n        '17-HCAA-01168'\n    ] AS path_uid_list\nMERGE (n:DM4)\n    SET n.path_uid_list = path_uid_list\nRETURN SIZE(path_uid_list) AS number_of_paths;\n\n",
+          "width": "3",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 4 - Preprocessing",
+      "reports": [
+        {
+          "title": "Preprocessing",
+          "query": "\nMATCH (n:DM4)\nWITH\n    n.path_uid_list AS path_uid_list\nMATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)\n\tWHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND \n        s.text =~ 'Conditions\\\\s+that\\\\s+relate\\\\s+to(\\\\s+the)?\\\\s+(compensation|(habitat\\\\s+)?offsett?ing)(\\\\s+(for|of)(\\\\s+the\\\\s+serious\\\\s+(b|h)arm\\\\s+to\\\\s+(f|F)ish(\\\\s+and\\\\s+impacts\\\\s+(on|to)\\\\s+aquatic\\\\s+species\\\\s+at\\\\s+risk)?\\\\s+likely\\\\s+to\\\\s+result\\\\s+from)?\\\\s+the\\\\s+authorized\\\\s+work,\\\\s+undertaking\\\\s+or\\\\s+activity(\\\\s+that\\\\s+results\\\\s+in\\\\s+impacts\\\\s+to\\\\s+fish(\\\\s+and\\\\s+fish)?\\\\s+habitat)?)?\\\\:?'\nWITH doc, r.item AS ri\n    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)\n        WHERE r.item STARTS WITH ri AND r.item <> ri\nWITH doc, apoc.coll.sort(COLLECT(DISTINCT(r.item))) AS rc\n    OPTIONAL MATCH\n        (doc)-[r1:HAS_SENTENCE {section: 'c'}]-(s1:SENTENCE),\n        (doc)-[r2:HAS_SENTENCE {section: 'c'}]-(s2:SENTENCE)\n        WHERE \n            r1.item IN rc AND \n            s1.text =~ 'Scale\\\\s+and\\\\s+description\\\\s+of\\\\s+offsetting\\\\s+measures.*' AND\n            r2.item IN rc AND\n            s2.text =~ 'Contingency\\\\s+measures.*'           \nWITH doc, rc, COLLECT(DISTINCT(r1.item)) AS r1c, COLLECT(DISTINCT(r2.item)) AS r2c\nWITH doc, rc,\n    REDUCE(r = HEAD(r1c), e IN r1c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r1,\n    REDUCE(r = HEAD(r2c), e IN r2c | CASE e < r WHEN TRUE THEN e ELSE r END) AS r2\nWITH doc, r1, r2, \n    CASE \n        WHEN r1 IS NULL AND r2 IS NULL THEN rc\n        WHEN r1 IS NULL AND r2 IS NOT NULL THEN \n            REDUCE(r = [], e IN rc | CASE e < r2  WHEN TRUE THEN r + [e] ELSE r END)\n        WHEN r1 IS NOT NULL AND r2 IS NULL THEN \n            REDUCE(r = [], e IN rc | CASE e >= r1  WHEN TRUE THEN r + [e] ELSE r END)\n        ELSE \n            REDUCE(r = [], e IN rc | CASE e >= r1 AND e < r2  WHEN TRUE THEN r + [e] ELSE r END)\n    END AS rc\nWITH doc, rc\n    SET doc.dm4_rc = rc\nRETURN\n    COUNT(doc) AS number_of_authorizations;\n\n",
+          "width": "12",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 4 - Output",
+      "reports": [
+        {
+          "title": "Executing query",
+          "query": "MATCH (n:DM4)\nWITH\n    apoc.convert.fromJsonList(n.objects) AS dm4_objects,\n    apoc.convert.fromJsonList(n.goals) AS dm4_goals,\n    apoc.convert.fromJsonList(n.goals) AS dm4_actions,\n    n.path_uid_list AS path_uid_list\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)\n        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND \n            r.item IN doc.dm4_rc\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence ORDER BY doc.uid ASC, r.i ASC\n    MATCH (sentence)-[:HAS_KEY_PHRASE]->(:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence,\n    COLLECT(DISTINCT(word.stem)) AS words\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence, words,\n    REDUCE(r = [], term IN dm4_objects | \n        CASE apoc.coll.containsAll(words, [e IN term | e[0]])\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS object_phrases\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence, words,\n    object_phrases,\n    REDUCE(r = [], term IN dm4_goals | \n        CASE apoc.coll.containsAll(words, [e IN term | e[0]])\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS goal_phrases\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence, words,\n    object_phrases, goal_phrases,\n    REDUCE(r = [], term IN dm4_actions | \n        CASE apoc.coll.containsAll(words, [e IN term | e[0]])\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS action_phrases\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(foot_print:NE_FOOTPRINT)\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    COLLECT(DISTINCT(foot_print.text)) AS foot_prints\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_DATE)\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints,\n    COLLECT(DISTINCT(entity.text)) AS dates\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints, dates\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity)\n        WHERE 0 < SIZE(apoc.coll.intersection(\n            ['NE_LOCATION', 'NE_ORGANIZATION', 'NE_BUILDING', 'NE_ECOLOGY', 'NE_WATERBODY'],\n            LABELS(entity)\n        ))\nRETURN doc.uid,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints, dates,\n    COLLECT(DISTINCT(entity.text)) AS entities,\n    sentence.text;\n\n",
+          "width": "12",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
         }
       ]
     }

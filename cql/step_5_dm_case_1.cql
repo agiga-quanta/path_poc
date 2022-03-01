@@ -58,8 +58,8 @@ MERGE (n:DM1)
         n.impacts = apoc.convert.toJson(custom.run_nlp(impacts, stanford_url, nltk_url)),
         n.reasons = apoc.convert.toJson(custom.run_nlp(reasons, stanford_url, nltk_url))
 RETURN
-    apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,
-    apoc.convert.fromJsonList(n.reasons) AS dm1_reasons;
+    SIZE(apoc.convert.fromJsonList(n.impacts)) AS dm1_impacts,
+    SIZE(apoc.convert.fromJsonList(n.reasons)) AS dm1_reasons;
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -92,14 +92,10 @@ MATCH (n:DM1)
 WITH 
     apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,
     apoc.convert.fromJsonList(n.reasons) AS dm1_reasons,
-    [ 
-        '14-HCAA-00225',
-        '14-HCAA-01139',
-        '14-HCAA-00258',
-        '17-HCAA-01168'
-    ] AS path_uid_list
+    n.path_uid_list AS path_uid_list
     MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_NAMED_ENTITY]->(foot_print:NE_FOOTPRINT)
-        WHERE doc.uid IN path_uid_list AND r.item = 'impact_harm'
+        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND 
+			r.item = 'impact_harm'
 WITH dm1_impacts, dm1_reasons, doc, sentence, foot_print
     MATCH
         (sentence)-[:HAS_KEY_PHRASE]->(impact_phrase:KEY_PHRASE)-[:HAS_WORD]->(iword:WORD),

@@ -222,18 +222,53 @@ Now, open a browser and point at [Neo4j](http://localhost:7474), you will see th
 If it is the first time you access Neo4j from the browser, you will see a form **Connect to Neo4j**, type *neo4j* into the *Username* edit box,
 and *path_poc* (all small caps and an underscore character) into the *Password* edit box, then click *Connect* button.
 
+##### Test if Neo4j is ready
 Copy and paste the following query into the edit box started with the prompt **neo4j$** to test if the database is ready
 
     CALL dbms.components()
         YIELD name, versions, edition
     UNWIND versions AS version
-    RETURN name, version, edition;
-
-You can click the **blue arrow** or press Ctrl+Enter (after copy the query into the **neo4j$** prompt and your mouse course is still inside that box.) If you see
-
-    | name | version        | edition |             |
-    |------|----------------|---------|-------------|
-    | 1    | "Neo4j Kernel" | "4.4.3" | "community" |
+    RETURN name, version, edition
+    UNION 
+    RETURN "APOC" AS name, apoc.version() AS version, "" AS edition
+    UNION 
+    RETURN "GDS" AS name, gds.version() AS version, "" AS edition;
 
 
+You can click the **blue arrow** or press *Cmd+Enter* (after copy the query into the **neo4j$** prompt and your mouse course is still inside that box.) Below is what you should see:
+
+| name | version        | edition |             |
+|------|----------------|---------|-------------|
+| 1    | "Neo4j Kernel" | "4.4.3" | "community" |
+
+##### Import json data into Neo4j
+Now, open *Finder*, navigate to the folder *path_poc*, go into sub-folder *cql*, open the file **all_in_one.cql** with *TextEdit.app* (left click, select Open, select *TextEdit.app*).
+
+Use *Cmd+A* to select all the text, *Cmd+C* to copy the content of the text file, then move to the browser, copy the query into the **neo4j$** prompt and run it by *Cmd+Enter*. Wait for a few minutes. When you see all the checkboxes are green-checked, then it is done (anything else can be trouble.)
+
+Inspect the database by looking at its statistics, copy, paste, and run the following:
+
+    CALL apoc.meta.stats() YIELD labelCount, relTypeCount, propertyKeyCount, nodeCount, relCount, labels, relTypes, stats
+    RETURN stats;
+
+You should see the result starts with something similar as below,
+
+    "relTypeCount": 4,
+    "propertyKeyCount": 30,
+    "labelCount": 35,
+    "nodeCount": 40886,
+    "relCount": 275835,
+
+### Data Mining Cases
+Starts the *neodash* docker by
+
+    docker-compose up -d neodash
+
+Click on *NEW DASHBOARD* if it is your first time. Then fill the password *path_poc*, and click *CONNECT* to connect to Neo4j.
+
+Now, click on the *Load Dashboard* button on the left side, navigate to the *path_poc* directory, and load the *dashboard.json* file.
+
+Follow the instructions on the dashboard.
+
+After loading, you can click on the *Save Dashboard* to save it to Neo4j.
 
