@@ -272,3 +272,47 @@ Follow the instructions on the dashboard.
 
 After loading, you can click on the *Save Dashboard* to save it to Neo4j.
 
+### Reprocessing a a few xhtml document
+First, for each document, for example *11-HCAA-CA4-01139_Authorization.xhtml* you need to reprocess by running:
+
+    docker-compose run --rm doc_processor 11-HCAA-CA4-01139_Authorization.xhtml
+
+and then clean up Neo4j with queries,
+
+    CALL apoc.periodic.iterate(
+    "
+        MATCH (n)
+        RETURN n
+    ","
+        DETACH DELETE n;
+    ",
+    {
+        batchSize:1000, iterateList:true, parallel:false
+    });
+
+and then import the json data into Neo4j as described above.
+
+### Define new or modify existing named entities
+If you define new or modify existing named entities (in *conf/regexner.mappings*), then you need to rerun the NLP processing:
+
+    docker-compose stop stanford_nlp
+    docker-compose up -d stanford_nlp
+    docker-compose up -d doc_processor
+
+and then clean up Neo4j with queries,
+
+    CALL apoc.periodic.iterate(
+    "
+        MATCH (n)
+        RETURN n
+    ","
+        DETACH DELETE n;
+    ",
+    {
+        batchSize:1000, iterateList:true, parallel:false
+    });
+
+and then import the json data into Neo4j as described above.
+
+    
+    
