@@ -1,6 +1,7 @@
 /data
 /neo4j/data
 /neo4j/logs
+/neo4j/plugins
 .DS_Store
 *.xlsx
 

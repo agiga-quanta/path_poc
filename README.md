@@ -147,6 +147,11 @@ You should see something as below,
     neo4j                       4.4.3     5e4d45f69541   2 weeks ago    579MB
     apache/tika                 2.1.0     0546ced95220   3 months ago   428MB
 
+#### B.5 Get the Neo4j plugins
+We need the [Neo4j APOC Library](https://neo4j.com/developer/neo4j-apoc/) and the [Graph Data Science](https://neo4j.com/developer/graph-data-science/), simply run:
+
+    ./gather_neo4j_plugins.sh
+
 ### C. Processing pipelines
 
 #### C.1 Extracting data from pdf files
