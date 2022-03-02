@@ -6,7 +6,7 @@
 # - graph-data-science
 ####################
 
-mkdir -p data logs plugins
+mkdir -p neo4j/data neo4j/logs neo4j/plugins
 
 NEO4J_VERSION=4.4.3
 GDS_LIB_VERSION=1.8.2
