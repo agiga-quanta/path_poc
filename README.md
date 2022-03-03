@@ -98,7 +98,7 @@ Download with *curl* the binary **jzon.zip**, which contains all *natural langua
 
     curl -L -o data/json.zip "https://www.dropbox.com/s/2rse6896qvjp1f0/json.zip?dl=1"    
     cd data
-    unzip xhtml.zip
+    unzip json.zip
     cd ..
 
 #### B.3 If you have already previous versions of some docker images and containers
