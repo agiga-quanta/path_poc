@@ -99,7 +99,7 @@ MERGE (n:DM4)
 RETURN
     SIZE(apoc.convert.fromJsonList(n.objects)) AS number_of__objects,
     SIZE(apoc.convert.fromJsonList(n.goals)) AS number_of_goals,
-    SIZE(apoc.convert.fromJsonList(n.goals)) AS number_of_actions;
+    SIZE(apoc.convert.fromJsonList(n.actions)) AS number_of_actions;
 //
 ////////////////////////////////////////////////////////////////////////
 

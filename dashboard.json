@@ -1,8 +1,8 @@
 {
-  "title": "",
+  "title": "Proof of Concept (POC) for mining Program Activity Tracking for Habitat (PATH)",
   "version": "2.0",
   "settings": {
-    "pagenumber": 5,
+    "pagenumber": 2,
     "editable": true,
     "fullscreenEnabled": true,
     "queryTimeLimit": 30
