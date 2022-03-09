@@ -4,7 +4,8 @@
 //
 WITH
     [
-        "death of fish", 
+        "death of fish",
+        "destroy",
         "destruction",
         "disruption", 
         "harmful alteration", 
@@ -18,6 +19,7 @@ WITH
         "abutment",
         "armouring",
         "bank protection",
+        "bank stabilization",
         "berms",
         "causeway",
         "changes to flow",
