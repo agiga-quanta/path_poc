@@ -302,10 +302,17 @@ Now, open a browser and point at [Stanford CoreNLP with custom NERs](http://loca
 
 In the **- Annotations -** dropbox, select *part-of-speech*, *lemmas*, *named entities*, *named entities (regexner)*, *constituency parse* in **this order**, copy and paste the following paragraph into the **- Text to annotate -** box.
 
-    Scale and description of offsetting measures: Offsetting shall be carried out in accordance with the description below and as set out in the Proponent\u2019s Offsetting Plan and shall be undertaken at the Millhaven terminal site, the Stella terminal site, and Clark Island in Hay Bay, Lake Ontario.
+    Scale and description of offsetting measures: Offsetting shall be carried out in accordance with the description below and as set out in the Proponent's Offsetting Plan and shall be undertaken at the Millhaven terminal site, the Stella terminal site, and Clark Island in Hay Bay, Lake Ontario.
 
 It would take sometime to load the machined-learned (ML) datasets for the first run (or anytime when you change the set of annotators). 
-You now can see how the words are isolated, lemmatized, part-of-speech captured, named entities are recognized, and the tree of the constituency parsing result.
+
+You now can see how the words are isolated, lemmatized, part-of-speech captured, named entities are recognized,
+
+![CoreNLP output](/img/corenlp-output.png)
+
+and the tree of the constituency parsing result
+
+![Constituency tree](/img/nlp-tree.png)
 
 ### F.4 Import json data into Neo4j database
 Now, open a browser and point at [Neo4j](http://localhost:7474), you will see the interface to access and run some queries with Neo4j. You can also manually type into the address box:
@@ -327,6 +334,7 @@ Copy and paste the following query into the edit box started with the prompt **n
     UNION 
     RETURN "GDS" AS name, gds.version() AS version, "" AS edition;
 
+Note that the [Neo4j APOC Library](https://neo4j.com/developer/neo4j-apoc/), or *Awesome Procedures On Cypher (APOC)* is a set of amazing Cypher functions and procedures that greatly help to use Neo4j within its vast ecosystem of software.
 
 You can click the **blue arrow** or press *Cmd+Enter* (after copy the query into the **neo4j$** prompt and your mouse course is still inside that box.) Below is what you should see:
 
@@ -352,18 +360,232 @@ You should see the result starts with something similar as below,
     "nodeCount": 40886,
     "relCount": 275835,
 
+### F.5 Inspecting the metagraph
+
+    CALL apoc.meta.graph
+
+![Meta graph](/img/meta_graph.png)
+
 ### G. Data Mining Cases
 Starts the *neodash* docker by
 
     docker-compose up -d neodash
 
-Click on *NEW DASHBOARD* if it is your first time. Then fill the password *path_poc*, and click *CONNECT* to connect to Neo4j.
+Click on *NEW DASHBOARD* if it is your first time. Then fill the password *path_poc*, and click *CONNECT* to connect to Neo4j. Now, click on the *Load Dashboard* button on the left side, navigate to the *path_poc* directory, and load the *dashboard.json* file.
 
-Now, click on the *Load Dashboard* button on the left side, navigate to the *path_poc* directory, and load the *dashboard.json* file.
+#### G.1 Load Dashboard
+
+![Load Dashboard](/img/load_dashboard.png)
 
 Follow the instructions on the dashboard.
-
 After loading, you can click on the *Save Dashboard* to save it to Neo4j.
+
+#### G.2 Status & Statistics
+
+The dashboard contains a number of tabs. The first one is *Status & Statistics.* On this tab the version of *Neo4j* and the libraries *APOC*, *GDS* are shown in the left panel. The middle and right panels show the node and relationship statistics.
+
+![Status & Statistics](/img/status_stat.png)
+
+#### G.2.1 Custom configuraton and Cypher for Status & Statistics
+
+Note that each panel can be customized by clicking on the three vertical dots (settings icon) at the top-right corner of the panel. The panel can be zoomed to full-screen by clicking on the square icon next to the settings icon. The size of the panel can easily be selected from a dropdown box. The type of the panel depends on the **type of the returned data** by the Cypher query.
+
+![Load Dashboard](/img/status_stat_2.png)
+
+The content of the panel is the Cypher query that runs and obtains information from the database, which is exactly the same Cypher we used earlier to inspect the database.
+
+    CALL dbms.components()
+        YIELD name, versions, edition
+    UNWIND versions AS version
+    RETURN name, version, edition
+    UNION 
+    RETURN "APOC" AS name, apoc.version() AS version, "" AS edition
+    UNION 
+    RETURN "GDS" AS name, gds.version() AS version, "" AS edition;
+
+***Thus, by adding a custom panel, configure a Cypher query and its return type, you can dynamically and gradually build up a powerful data mining application.***
+
+#### G.2.2 Tab for Case 1 - Input
+
+![Case 1 - Input](/img/case_1_input.png)
+
+##### G.2.2.1 Description Panel
+The first data mining case (Case 1) is described in [Markdown](https://www.markdownguide.org/getting-started/) language as below. Note that this is a static text and has zero effect on the input or output of the data mining.
+
+Looking a:
+- section **Description**,
+- paragraph **serious harm to fish**, started with the sentence specified by the regular expression: *The\s+serious\s+harm\s+to\s+fish\s+(and\s+impacts\s+to\s+aquatic\s+species\s+at\s+risk\s+)?likely\s+to\s+result\s+from\s+the\s+proposed\s+work(s|\(s\))?\,\s+undertaking(s|\(s\))?\,\s?or\s+activit(ies|y(\(ies\))?)?\,\s?and\s+covered\s+by\s+this\s+authorization\s+(includes|are)(\;|\:)?*,
+- detects if there is any **foot prints** such as *12 m2*,
+- extract terms matched **impacts**, such as *death of fish, destruction, disruption, harmful alteration, kill, loss, permanent alteration, permanent destruction, temporary alteration*
+- or matches **reasons**, such as *abutment, armouring, bank protection, berms, causeway, changes to flow, channel deepening, channel realignment, coffer dam, cofferdam, concrete pipe, construction, culvert, dewatering, dredging, entrainment, extension, fill, hydraulic impact, impingement, in-stream pier, incidental, infilling, instream pier, pier, piles, placement of sand, re-sloping, realignment, rip rap, riprap, rock fill, shoreline protection, spur, temporary infilling*
+
+![Case 1 - Impact and Reason terms](/img/case_1_description_markdown.png)
+
+##### G.2.2.2 Input: Impact and Reasons Terms
+
+Below the description panels are two panels. The first panel for *accepting, analyzing , and storing* custom terms for impact and reason (as described in the description panel). This is, again, a customizable panel with a predefined query, where the terms in the two list of terms can be easily modified.
+
+![Case 1 - Impact and Reason terms](/img/case_1_terms_query.png)
+
+    WITH
+        [
+            "death of fish",
+            "destroy",
+            "destruction",
+            "disruption", 
+            "harmful alteration", 
+            "kill",
+            "loss",
+            "permanent alteration", 
+            "permanent destruction",
+            "temporary alteration"
+        ] AS impacts,
+        [
+            "abutment",
+            "armouring",
+            "bank protection",
+            "bank stabilization",
+            "berms",
+            "causeway",
+            "changes to flow",
+            "channel deepening",
+            "channel realignment",
+            "coffer dam",
+            "cofferdam",
+            "concrete pipe",
+            "construction",
+            "culvert",
+            "dewatering",
+            "dredging",
+            "entrainment",
+            "extension",
+            "fill",
+            "hydraulic impact",
+            "impingement",
+            "in-stream pier",
+            "incidental",
+            "infilling",
+            "instream pier",
+            "pier",
+            "piles", 
+            "placement of sand",
+            "re-sloping",
+            "realignment",
+            "rip rap",
+            "riprap",
+            "rock fill",
+            "shoreline protection",
+            "spur",
+            "temporary infilling"
+        ] AS reasons,
+        "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
+        "http://nltk_nlp:6543/stem"  AS nltk_url
+    MERGE (n:DM1)
+        SET 
+            n.impacts = apoc.convert.toJson(custom.run_nlp(impacts, stanford_url, nltk_url)),
+            n.reasons = apoc.convert.toJson(custom.run_nlp(reasons, stanford_url, nltk_url))
+    RETURN
+        SIZE(apoc.convert.fromJsonList(n.impacts)) AS dm1_impacts,
+        SIZE(apoc.convert.fromJsonList(n.reasons)) AS dm1_reasons;
+
+Note that the output is stored in a single node with the label *DM1* (data mining 1.) 
+
+##### G.2.2.3 Input: List of PATH cases to be investigated.
+
+The list of PATH cases to be investigated, each identification is the prefix of the file name without the *_Authorization* and extention (such as *.pdf*).
+
+![Case 1 - List of PATH cases](/img/case_1_path_query.png)
+
+    WITH
+        [
+            '14-HCAA-00225',
+            '14-HCAA-01139',
+            '14-HCAA-00258',
+            '17-HCAA-01168'
+        ] AS path_uid_list
+    MERGE (n:DM1)
+        SET n.path_uid_list = path_uid_list
+    RETURN SIZE(path_uid_list) AS number_of_paths;
+
+Note that the output is also stored in the node with label *DM1* (data mining 1.) 
+
+Note that if you want to run the query of the case for **all** document, you must leave the list of the documents **empty** as shown below
+
+    ...
+    WITH
+        [
+        ] AS path_uid_list
+    ...
+
+##### G.2.2.4 Output
+
+The output query is shown in the image below.
+
+![Case 1 - Output query](/img/case_1_output_query.png)
+
+Lets dissect it. First the query access the input information stored in the *DM1* node, use them to fetch the *PATH* nodes, representing the PATH documents (with identifications defined in the list of PATH cases, as explained above), where the item ***impact_harm*** of the section ***d*** contains a *named entity* with type ***NE_FOOTPRINT***.
+
+For example *14-HCAA-00225* contains *To account for variability in impingement and entrainment values, Bruce Power is authorized to kill up to a maximum loss of loss of 6600 kilogram per year (kg/yr) calculated by HPI.*
+
+Here is the partial (and runable) query
+
+    MATCH (n:DM1)
+    WITH 
+        apoc.convert.fromJsonList(n.impacts) AS dm1_impacts,
+        apoc.convert.fromJsonList(n.reasons) AS dm1_reasons,
+        n.path_uid_list AS path_uid_list
+        MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'd'}]-(sentence:SENTENCE)-[:HAS_NAMED_ENTITY]->(foot_print:NE_FOOTPRINT)
+            WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND 
+                r.item = 'impact_harm'
+    RETURN doc, sentence, foot_print;
+
+![Case 1 - Partial output query](/img/case_1_doc_sent_fp.png)
+
+Then it continues to collect all *KEY_PHRASE* nodes of the sentences,
+
+    MATCH
+        (sentence)-[:HAS_KEY_PHRASE]->(impact_phrase:KEY_PHRASE)-[:HAS_WORD]->(iword:WORD),
+        (sentence)-[:HAS_KEY_PHRASE]->(reason_phrase:KEY_PHRASE)-[:HAS_WORD]->(rword:WORD)
+    WHERE impact_phrase <> reason_phrase
+
+and makes sure that ***at least one impact term*** and ***at least one reason term*** are among those,
+
+    WHERE
+        ANY(term IN dm1_impacts WHERE apoc.coll.containsAll(iwords, [e IN term | e[0]])) AND
+        ANY(term IN dm1_reasons WHERE apoc.coll.containsAll(rwords, [e IN term | e[0]]))
+
+then return whatever other meaningful named entities among *LOCATION, ORGANIZATION, PERSON, TITLE,BUILDING, ECOLOGY,* or *WATERBODY.*
+
+    WITH
+        [
+            'NE_LOCATION', 
+            'NE_ORGANIZATION', 
+            'NE_PERSON', 
+            'NE_TITLE',
+            'NE_BUILDING',
+            'NE_ECOLOGY',
+            'NE_WATERBODY'
+        ] AS entity_types,
+        ...
+        OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity)
+            WHERE SIZE(apoc.coll.intersection(entity_types, LABELS(entity))) > 0
+
+![Case 1 - Output](/img/case_1_output.png)
+
+Below is the textual output.
+
+| path_uid      | foot_prints                                                               | impact_phrases                            | reason_phrases                                                           | named_entities              | sentence                                                                                                                                                                                                                                                                                                                                                                                            |   |
+|---------------|---------------------------------------------------------------------------|-------------------------------------------|--------------------------------------------------------------------------|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---|
+| 14-HCAA-00225 | [6600 kilogram per year]                                                  | [[[kill],[loss]]]                         | [[[entrainment],[impingement]]]                                          | [[Bruce Power,HPI]]         | To account for variability in impingement and entrainment values, Bruce Power is authorized to kill up to a maximum loss of loss of 6600 kilogram per year (kg/yr) calculated by HPI.                                                                                                                                                                                                               |   |
+| 14-HCAA-00258 | [2000 square metres of fish habitat]                                      | [[[destruction]]]                         | [[[infilling]]]                                                          | [[]]                        | Destruction of approximately 2000 square metres of fish habitat associated with infilling.                                                                                                                                                                                                                                                                                                          |   |
+| 14-HCAA-01139 | [3410 m2 of habitat]                                                      | [[[destruction],[permanent,destruction]]] | [[[infilling]]]                                                          | [[Millhaven terminal site]] | Destruction of approximately 3410 m2 of habitat at the Millhaven terminal site through permanent infilling.                                                                                                                                                                                                                                                                                         |   |
+| 14-HCAA-01139 | [2695 m2 of habitat]                                                      | [[[destruction],[permanent,destruction]]] | [[[infilling]]]                                                          | [[Stella terminal site]]    | Destruction of approximately 2695 m2 of habitat at the Stella terminal site through permanent infilling.                                                                                                                                                                                                                                                                                            |   |
+| 14-HCAA-01139 | [1930 m2]                                                                 | [[[permanent,alteration]]]                | [[[dredging]]]                                                           | [[Millhaven terminal site]] | Permanent alteration of approximately 1930 m2 at the Millhaven terminal site through dredging.                                                                                                                                                                                                                                                                                                      |   |
+| 14-HCAA-01139 | [890 m2]                                                                  | [[[permanent,alteration]]]                | [[[dredging]]]                                                           | [[Stella terminal site]]    | Permanent alteration of approximately 890 m2 at the Stella terminal site through dredging.                                                                                                                                                                                                                                                                                                          |   |
+| 14-HCAA-01139 | [575 m2]                                                                  | [[[permanent,alteration]]]                | [[[shoreline,protection]]]                                               | [[Millhaven terminal site]] | Permanent alteration of approximately 575 m2 al the Millhaven terminal site through the installation of shoreline protection.                                                                                                                                                                                                                                                                       |   |
+| 14-HCAA-01139 | [497 m2]                                                                  | [[[permanent,alteration]]]                | [[[shoreline,protection]]]                                               | [[Stella terminal site]]    | Permanent alteration of approximately 497 m2 at the Stella terminal site through the installation of shoreline protection.                                                                                                                                                                                                                                                                          |   |
+| 17-HCAA-01168 | [17,170 m2 of fish habitat]                                               | [[[permanent,alteration]]]                | [[[coffer,dam],[construction]]]                                          | [[river]]                   | The permanent alteration of 17,170 m2 of fish habitat associated with the construction of coffer dams in the river during the project.                                                                                                                                                                                                                                                              |   |
+| 17-HCAA-01168 | [129 m2,6,096 m2,2,672 m2,8,897 m2 of fish habitat,43 m2,394 m2,5,702 m2] | [[[destruction]]]                         | [[[abutment],[berms],[construction],[infilling],[instream,pier],[pier]]] | [[river]]                   | The destruction of 8,897 m2 of fish habitat including: 6,096 m2 associated with infilling along the west (5,702 m2) and east (394 m2) shorelines of the river to construct the two abutments; 2,672 m2 associated with the construction of a toe berm along the front of the left (west) bank abutment; and, 129 m2 associated with the construction of three instream concrete piers (43 m2 each). |   |
 
 ### H. Refactorings
 
@@ -409,5 +631,62 @@ and then clean up Neo4j with queries,
 
 and then import the json data into Neo4j as described above.
 
-    
-    
+Here are some example mappings
+
+| Truax Dam                                                                                                            | DAM          | ORGANIZATION        | 1.0 |
+|----------------------------------------------------------------------------------------------------------------------|--------------|---------------------|-----|
+| Beatty Saugeen River                                                                                                 | WATERBODY    | LOCATION\|TITLE     | 1.0 |
+| (Abitibi\|Elbow\|Kananaskis\|Saugeen) River                                                                          | WATERBODY    | LOCATION\|TITLE     | 1.0 |
+| Evan Thomas Creek                                                                                                    | WATERBODY    | LOCATION            | 1.0 |
+| (Meux\|Otter\|Karel) Creek                                                                                           | WATERBODY    | LOCATION            | 1.0 |
+| Lake (Huron\|Ontario) watershed                                                                                      | ECOLOGY      | NNP\|NN             | 1.0 |
+| Lake (Huron\|Ontario)                                                                                                | WATERBODY    | LOCATION\|CITY      | 1.0 |
+| Otter Rapids                                                                                                         | WATERBODY    | NNP                 | 1.0 |
+| walleye                                                                                                              | SPECIES      | NN                  | 1.0 |
+| lake sturgeon                                                                                                        | SPECIES      | NN                  | 1.0 |
+| sturgeon                                                                                                             | SPECIES      | NN                  | 1.0 |
+| white sucker                                                                                                         | SPECIES      | NN                  | 1.0 |
+| lake whitefish                                                                                                       | SPECIES      | NN                  | 1.0 |
+| Habitat Productivity Index                                                                                           | ECOLOGY      | NNP                 | 1.0 |
+| HPI                                                                                                                  | ECOLOGY      | NNP                 | 1.0 |
+| HADD                                                                                                                 | ECOLOGY      | NNP                 | 1.0 |
+| Flood Damage Repairs                                                                                                 | ECOLOGY      | NNP                 | 1.0 |
+| (D\|d)eath of fish                                                                                                   | ECOLOGY      | NN\|IN              | 1.0 |
+| Clark Island                                                                                                         | LOCATION     | CITY\|LOCATION      | 1.0 |
+| Hay Bay                                                                                                              | LOCATION     | CITY\|LOCATION      | 1.0 |
+| Abitibi Canyon                                                                                                       | LOCATION     | NNP\|ORGANIZATION   | 1.0 |
+| 25th Avenue Bridge                                                                                                   | BUILDING     | ORDINAL             | 1.0 |
+| 25 Avenue SW Bridge                                                                                                  | BUILDING     | CD\|ORDINAL         | 1.0 |
+| [A-Z][a-z]+ and [A-Z][a-z]+ terminals                                                                                | BUILDING     | NNP\|CC\|NNS        | 1.0 |
+| [A-Z][a-z]+ terminal site                                                                                            | LOCATION     | NNP\|NN             | 1.0 |
+| [A-Z][a-z]+ terminal                                                                                                 | BUILDING     | NNP\|NN             | 1.0 |
+| [A-Z][a-z]+ pier                                                                                                     | BUILDING     | NNP\|NN             | 1.0 |
+| Kananaskis golf course                                                                                               | BUILDING     | NNP\|NN             | 1.0 |
+| Station \d \+\d{3}                                                                                                   | BUILDING     | NN\|NNP\|CD         | 1.0 |
+| Bruce Power                                                                                                          | ORGANIZATION | PERSON              | 1.0 |
+| Matrix Solutions Inc\.                                                                                               | ORGANIZATION | NNP\|NNPS           | 1.0 |
+| Fisheries and Oceans Canada \(DFO\)                                                                                  | ORGANIZATION | NNP\|NNPS           | 1.0 |
+| Fisheries and Oceans Canada                                                                                          | ORGANIZATION | NNP\|NNPS           | 1.0 |
+| Department of Fisheries and Oceans \(DFO\)                                                                           | ORGANIZATION | NNP\|NNPS           | 1.0 |
+| Department of Fisheries and Oceans                                                                                   | ORGANIZATION | NNP\|NNPS           | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s?          | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? and ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? c(enti)?m(eter\|etre)?s? | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
+| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? in size              | FOOTPRINT    | CD\|IN\|JJ\|NN\|NNS | 1.0 |
+| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? in size                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                            | FOOTPRINT    | CD\|IN\|JJ\|NN      | 1.0 |
+| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                               | FOOTPRINT    | CD\|JJ\|NN          | 1.0 |
+| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (hectare)s? in size                                           | FOOTPRINT    | CD\|IN\|JJ\|NN\|NNS | 1.0 |
+| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (hectare)s? in size                                              | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+| roughly ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s? in depth                                        | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0 |
+| up to ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s? in size                                           | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0 |
+| approximately ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (kilogram\|kg)s? per [a-z]+                                | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? of fish habitat                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? of habitat                      | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s?                                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (kilogram\|kg)s? per [a-z]+                                              | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? habitat unit                                                             | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s?                                                         | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2 of fish habitat                                                       | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2 of habitat                                                            | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                                       | FOOTPRINT    | CD\|NN\|NNS         | 1.0 |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? ha                                                                       | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
