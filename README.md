@@ -631,7 +631,7 @@ and then clean up Neo4j with queries,
 
 and then import the json data into Neo4j as described above.
 
-Details instruction is here [Stanford RegexNER](https://nlp.stanford.edu/software/regexner.html)
+Details instruction is here [Stanford RegexNER](https://nlp.stanford.edu/software/regexner.html).
 
 Here are some example mappings,
 
