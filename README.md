@@ -175,16 +175,14 @@ Create a *data* sub-folder,
 
     mkdir data
 
-Download with *curl* the binary **xhtml.zip**, which contains all content previously *extracted* from pdf files and **manually fixed**.
+Obtain the binary **xhtml.zip**, which contains all content previously *extracted* from pdf files and **manually fixed** and placed it into the *data/* directory.
 
-    curl -L -o data/xhtml.zip "https://www.dropbox.com/s/b4cdffteuf111iw/xhtml.zip?dl=1"
     cd data
     unzip xhtml.zip
     cd ..
 
-Download with *curl* the binary **jzon.zip**, which contains all *natural language processed* content from *xhtml* files into *json* files.
+Obtain the binary **jzon.zip**, which contains all *natural language processed* content from *xhtml* files into *json* files and placed it into the *data/* directory.
 
-    curl -L -o data/json.zip "https://www.dropbox.com/s/2rse6896qvjp1f0/json.zip?dl=1"    
     cd data
     unzip json.zip
     cd ..
