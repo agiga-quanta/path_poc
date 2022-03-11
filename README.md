@@ -631,62 +631,65 @@ and then clean up Neo4j with queries,
 
 and then import the json data into Neo4j as described above.
 
-Here are some example mappings
+Details instruction is here [Stanford RegexNER](https://nlp.stanford.edu/software/regexner.html)
 
-| Truax Dam                                                                                                            | DAM          | ORGANIZATION        | 1.0 |
-|----------------------------------------------------------------------------------------------------------------------|--------------|---------------------|-----|
-| Beatty Saugeen River                                                                                                 | WATERBODY    | LOCATION\|TITLE     | 1.0 |
-| (Abitibi\|Elbow\|Kananaskis\|Saugeen) River                                                                          | WATERBODY    | LOCATION\|TITLE     | 1.0 |
-| Evan Thomas Creek                                                                                                    | WATERBODY    | LOCATION            | 1.0 |
-| (Meux\|Otter\|Karel) Creek                                                                                           | WATERBODY    | LOCATION            | 1.0 |
-| Lake (Huron\|Ontario) watershed                                                                                      | ECOLOGY      | NNP\|NN             | 1.0 |
-| Lake (Huron\|Ontario)                                                                                                | WATERBODY    | LOCATION\|CITY      | 1.0 |
-| Otter Rapids                                                                                                         | WATERBODY    | NNP                 | 1.0 |
-| walleye                                                                                                              | SPECIES      | NN                  | 1.0 |
-| lake sturgeon                                                                                                        | SPECIES      | NN                  | 1.0 |
-| sturgeon                                                                                                             | SPECIES      | NN                  | 1.0 |
-| white sucker                                                                                                         | SPECIES      | NN                  | 1.0 |
-| lake whitefish                                                                                                       | SPECIES      | NN                  | 1.0 |
-| Habitat Productivity Index                                                                                           | ECOLOGY      | NNP                 | 1.0 |
-| HPI                                                                                                                  | ECOLOGY      | NNP                 | 1.0 |
-| HADD                                                                                                                 | ECOLOGY      | NNP                 | 1.0 |
-| Flood Damage Repairs                                                                                                 | ECOLOGY      | NNP                 | 1.0 |
-| (D\|d)eath of fish                                                                                                   | ECOLOGY      | NN\|IN              | 1.0 |
-| Clark Island                                                                                                         | LOCATION     | CITY\|LOCATION      | 1.0 |
-| Hay Bay                                                                                                              | LOCATION     | CITY\|LOCATION      | 1.0 |
-| Abitibi Canyon                                                                                                       | LOCATION     | NNP\|ORGANIZATION   | 1.0 |
-| 25th Avenue Bridge                                                                                                   | BUILDING     | ORDINAL             | 1.0 |
-| 25 Avenue SW Bridge                                                                                                  | BUILDING     | CD\|ORDINAL         | 1.0 |
-| [A-Z][a-z]+ and [A-Z][a-z]+ terminals                                                                                | BUILDING     | NNP\|CC\|NNS        | 1.0 |
-| [A-Z][a-z]+ terminal site                                                                                            | LOCATION     | NNP\|NN             | 1.0 |
-| [A-Z][a-z]+ terminal                                                                                                 | BUILDING     | NNP\|NN             | 1.0 |
-| [A-Z][a-z]+ pier                                                                                                     | BUILDING     | NNP\|NN             | 1.0 |
-| Kananaskis golf course                                                                                               | BUILDING     | NNP\|NN             | 1.0 |
-| Station \d \+\d{3}                                                                                                   | BUILDING     | NN\|NNP\|CD         | 1.0 |
-| Bruce Power                                                                                                          | ORGANIZATION | PERSON              | 1.0 |
-| Matrix Solutions Inc\.                                                                                               | ORGANIZATION | NNP\|NNPS           | 1.0 |
-| Fisheries and Oceans Canada \(DFO\)                                                                                  | ORGANIZATION | NNP\|NNPS           | 1.0 |
-| Fisheries and Oceans Canada                                                                                          | ORGANIZATION | NNP\|NNPS           | 1.0 |
-| Department of Fisheries and Oceans \(DFO\)                                                                           | ORGANIZATION | NNP\|NNPS           | 1.0 |
-| Department of Fisheries and Oceans                                                                                   | ORGANIZATION | NNP\|NNPS           | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s?          | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? and ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? c(enti)?m(eter\|etre)?s? | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
-| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? in size              | FOOTPRINT    | CD\|IN\|JJ\|NN\|NNS | 1.0 |
-| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? in size                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
-| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                            | FOOTPRINT    | CD\|IN\|JJ\|NN      | 1.0 |
-| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                               | FOOTPRINT    | CD\|JJ\|NN          | 1.0 |
-| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (hectare)s? in size                                           | FOOTPRINT    | CD\|IN\|JJ\|NN\|NNS | 1.0 |
-| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (hectare)s? in size                                              | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
-| roughly ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s? in depth                                        | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0 |
-| up to ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s? in size                                           | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0 |
-| approximately ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (kilogram\|kg)s? per [a-z]+                                | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? of fish habitat                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? of habitat                      | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s?                                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (kilogram\|kg)s? per [a-z]+                                              | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? habitat unit                                                             | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s?                                                         | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2 of fish habitat                                                       | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2 of habitat                                                            | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                                       | FOOTPRINT    | CD\|NN\|NNS         | 1.0 |
-| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? ha                                                                       | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0 |
+Here are some example mappings,
+
+| Regular expression                                                                                                   | Type         | POS tags            | Confidence |
+|----------------------------------------------------------------------------------------------------------------------|--------------|---------------------|------------|
+| Truax Dam                                                                                                            | DAM          | ORGANIZATION        | 1.0        |
+| Beatty Saugeen River                                                                                                 | WATERBODY    | LOCATION\|TITLE     | 1.0        |
+| (Abitibi\|Elbow\|Kananaskis\|Saugeen) River                                                                          | WATERBODY    | LOCATION\|TITLE     | 1.0        |
+| Evan Thomas Creek                                                                                                    | WATERBODY    | LOCATION            | 1.0        |
+| (Meux\|Otter\|Karel) Creek                                                                                           | WATERBODY    | LOCATION            | 1.0        |
+| Lake (Huron\|Ontario) watershed                                                                                      | ECOLOGY      | NNP\|NN             | 1.0        |
+| Lake (Huron\|Ontario)                                                                                                | WATERBODY    | LOCATION\|CITY      | 1.0        |
+| Otter Rapids                                                                                                         | WATERBODY    | NNP                 | 1.0        |
+| walleye                                                                                                              | SPECIES      | NN                  | 1.0        |
+| lake sturgeon                                                                                                        | SPECIES      | NN                  | 1.0        |
+| sturgeon                                                                                                             | SPECIES      | NN                  | 1.0        |
+| white sucker                                                                                                         | SPECIES      | NN                  | 1.0        |
+| lake whitefish                                                                                                       | SPECIES      | NN                  | 1.0        |
+| Habitat Productivity Index                                                                                           | ECOLOGY      | NNP                 | 1.0        |
+| HPI                                                                                                                  | ECOLOGY      | NNP                 | 1.0        |
+| HADD                                                                                                                 | ECOLOGY      | NNP                 | 1.0        |
+| Flood Damage Repairs                                                                                                 | ECOLOGY      | NNP                 | 1.0        |
+| (D\|d)eath of fish                                                                                                   | ECOLOGY      | NN\|IN              | 1.0        |
+| Clark Island                                                                                                         | LOCATION     | CITY\|LOCATION      | 1.0        |
+| Hay Bay                                                                                                              | LOCATION     | CITY\|LOCATION      | 1.0        |
+| Abitibi Canyon                                                                                                       | LOCATION     | NNP\|ORGANIZATION   | 1.0        |
+| 25th Avenue Bridge                                                                                                   | BUILDING     | ORDINAL             | 1.0        |
+| 25 Avenue SW Bridge                                                                                                  | BUILDING     | CD\|ORDINAL         | 1.0        |
+| [A-Z][a-z]+ and [A-Z][a-z]+ terminals                                                                                | BUILDING     | NNP\|CC\|NNS        | 1.0        |
+| [A-Z][a-z]+ terminal site                                                                                            | LOCATION     | NNP\|NN             | 1.0        |
+| [A-Z][a-z]+ terminal                                                                                                 | BUILDING     | NNP\|NN             | 1.0        |
+| [A-Z][a-z]+ pier                                                                                                     | BUILDING     | NNP\|NN             | 1.0        |
+| Kananaskis golf course                                                                                               | BUILDING     | NNP\|NN             | 1.0        |
+| Station \d \+\d{3}                                                                                                   | BUILDING     | NN\|NNP\|CD         | 1.0        |
+| Bruce Power                                                                                                          | ORGANIZATION | PERSON              | 1.0        |
+| Matrix Solutions Inc\.                                                                                               | ORGANIZATION | NNP\|NNPS           | 1.0        |
+| Fisheries and Oceans Canada \(DFO\)                                                                                  | ORGANIZATION | NNP\|NNPS           | 1.0        |
+| Fisheries and Oceans Canada                                                                                          | ORGANIZATION | NNP\|NNPS           | 1.0        |
+| Department of Fisheries and Oceans \(DFO\)                                                                           | ORGANIZATION | NNP\|NNPS           | 1.0        |
+| Department of Fisheries and Oceans                                                                                   | ORGANIZATION | NNP\|NNPS           | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? to ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s?          | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? and ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? c(enti)?m(eter\|etre)?s? | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0        |
+| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? in size              | FOOTPRINT    | CD\|IN\|JJ\|NN\|NNS | 1.0        |
+| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? in size                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
+| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                            | FOOTPRINT    | CD\|IN\|JJ\|NN      | 1.0        |
+| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                               | FOOTPRINT    | CD\|JJ\|NN          | 1.0        |
+| minimum of ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (hectare)s? in size                                           | FOOTPRINT    | CD\|IN\|JJ\|NN\|NNS | 1.0        |
+| minimum ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (hectare)s? in size                                              | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
+| roughly ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s? in depth                                        | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0        |
+| up to ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s? in size                                           | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0        |
+| approximately ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (kilogram\|kg)s? per [a-z]+                                | FOOTPRINT    | RB\|CD\|IN\|NN\|NNS | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? of fish habitat                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s? of habitat                      | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (cubic\|linear\|square) m(eter\|etre)?s?                                 | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? (kilogram\|kg)s? per [a-z]+                                              | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? habitat unit                                                             | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m(eter\|etre)?s?                                                         | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2 of fish habitat                                                       | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2 of habitat                                                            | FOOTPRINT    | CD\|IN\|NN\|NNS     | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? m2                                                                       | FOOTPRINT    | CD\|NN\|NNS         | 1.0        |
+| ((\d{1,3}(\,\d{3})+\|\d{1,3})\|\d+)(\.\d+)? ha                                                                       | FOOTPRINT    | CD\|JJ\|NN\|NNS     | 1.0        |
