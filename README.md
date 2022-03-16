@@ -151,7 +151,7 @@ You will need git to automatically download or update the git repository for the
     brew install git
 
 ### D.4. Install curl
-You will need curl to automatically download binary data from [Dropbox](https://www.dropbox.com)
+You will need curl to automatically download binary data from an online repository like [Dropbox](https://www.dropbox.com). However this is not necessary if you already have the project data in a local folder.
 
     brew install curl
 
@@ -171,6 +171,8 @@ Then run:
     cd path_poc
 
 ### E.2 Download pre-processed binary data (xhtml, json)
+Note that this process is only necessary if importing zip files into a local folder.
+
 Create a *data* sub-folder,
 
     mkdir data
@@ -240,7 +242,7 @@ We need the [Neo4j APOC Library](https://neo4j.com/developer/neo4j-apoc/) and th
 
 ## F. Processing pipelines
 
-### F.1 Extracting data from pdf files
+### F.1 Extracting data from pdf files into .xhtml format
 Note that you don't have to do this since this already been done and the content of all processed files is packaged inside *xhtml.zip*
 However if you want to do it again, follow the instructions below.
 
@@ -265,9 +267,11 @@ Stop the *tika* docker to save memory,
     docker-compose stop tika
 
 ### F.2 Run the extracted data through a Stanford CoreNLP pipeline, with Wordnet dictionary
+This step wold be performed if, for instance, a new dataset were being used in the pipeline,  or if we wanted to modify the content of the query cases.  The document processor uses the file *dp.ini* inside the folder *conf* to define the regular expressions that let the NLP tag parts of the document appropriately.  For instance, running a new case looking at a different part of the document would require a configuration component telling the processor how to identify and tag that part of the document,  then how to clean it if necessary. 
+    
 Note that you don't have to do this since this already been done and the content of all processed files is packaged inside *json.zip*
 However if you want to do it again, follow the instructions below.
-
+    
 **WARNING** Following the below instructions will alter the content of the files in the *data/json* sub-folder.
 You can restore them to the original pre-processed and manually fixed version by extracting the *json.zip* as show in a section above.
 
@@ -282,6 +286,8 @@ Then run the *doc_processor* docker
 This will process 248 **.xhtml* files into **.json* files.
 
 ### F.3 Using the *Standford CoreNLP with custom NERs* docker
+This section uses NLP parts-of-speech analysis to identify key entities in the sections of the document we are interested in.
+    
 *Note:* you can check which dockers are running by:
 
     docker-compose ps
@@ -313,6 +319,8 @@ and the tree of the constituency parsing result
 ![Constituency tree](/img/nlp-tree.png)
 
 ### F.4 Import json data into Neo4j database
+Neo4j is used to construct a graph database in whcih we can run queries about the documents we have processed so far. 
+    
 Now, open a browser and point at [Neo4j](http://localhost:7474), you will see the interface to access and run some queries with Neo4j. You can also manually type into the address box:
 
     http://localhost:7474
