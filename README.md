@@ -593,7 +593,7 @@ Below is the textual output.
 | 17-HCAA-01168 | [17,170 m2 of fish habitat]                                               | [[[permanent,alteration]]]                | [[[coffer,dam],[construction]]]                                          | [[river]]                   | The permanent alteration of 17,170 m2 of fish habitat associated with the construction of coffer dams in the river during the project.                                                                                                                                                                                                                                                              |   |
 | 17-HCAA-01168 | [129 m2,6,096 m2,2,672 m2,8,897 m2 of fish habitat,43 m2,394 m2,5,702 m2] | [[[destruction]]]                         | [[[abutment],[berms],[construction],[infilling],[instream,pier],[pier]]] | [[river]]                   | The destruction of 8,897 m2 of fish habitat including: 6,096 m2 associated with infilling along the west (5,702 m2) and east (394 m2) shorelines of the river to construct the two abutments; 2,672 m2 associated with the construction of a toe berm along the front of the left (west) bank abutment; and, 129 m2 associated with the construction of three instream concrete piers (43 m2 each). |   |
 
-#### G.2.3 [Case 5](#case-5)
+#### G.2.3 Case 5
 
 ##### G.2.3.1 Analysis
 
