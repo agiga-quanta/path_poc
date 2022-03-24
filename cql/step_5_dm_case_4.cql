@@ -97,7 +97,7 @@ MERGE (n:DM4)
         n.goals = apoc.convert.toJson(custom.run_nlp(goals, stanford_url, nltk_url)),
         n.actions = apoc.convert.toJson(custom.run_nlp(actions, stanford_url, nltk_url))
 RETURN
-    SIZE(apoc.convert.fromJsonList(n.objects)) AS number_of__objects,
+    SIZE(apoc.convert.fromJsonList(n.objects)) AS number_of_objects,
     SIZE(apoc.convert.fromJsonList(n.goals)) AS number_of_goals,
     SIZE(apoc.convert.fromJsonList(n.actions)) AS number_of_actions;
 //
@@ -123,7 +123,7 @@ WITH
     ] AS path_uid_list
 MERGE (n:DM4)
     SET n.path_uid_list = path_uid_list
-RETURN SIZE(path_uid_list) AS number_of_paths;
+RETURN SIZE(path_uid_list) AS path_uid_list;
 //
 ////////////////////////////////////////////////////////////////////////
 

@@ -2,7 +2,7 @@
   "title": "Proof of Concept (POC) for mining Program Activity Tracking for Habitat (PATH)",
   "version": "2.0",
   "settings": {
-    "pagenumber": 2,
+    "pagenumber": 11,
     "editable": true,
     "fullscreenEnabled": true,
     "queryTimeLimit": 30
@@ -222,6 +222,52 @@
           "title": "Executing query",
           "query": "MATCH (n:DM4)\nWITH\n    apoc.convert.fromJsonList(n.objects) AS dm4_objects,\n    apoc.convert.fromJsonList(n.goals) AS dm4_goals,\n    apoc.convert.fromJsonList(n.goals) AS dm4_actions,\n    n.path_uid_list AS path_uid_list\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)\n        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND \n            r.item IN doc.dm4_rc\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence ORDER BY doc.uid ASC, r.i ASC\n    MATCH (sentence)-[:HAS_KEY_PHRASE]->(:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence,\n    COLLECT(DISTINCT(word.stem)) AS words\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence, words,\n    REDUCE(r = [], term IN dm4_objects | \n        CASE apoc.coll.containsAll(words, [e IN term | e[0]])\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS object_phrases\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence, words,\n    object_phrases,\n    REDUCE(r = [], term IN dm4_goals | \n        CASE apoc.coll.containsAll(words, [e IN term | e[0]])\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS goal_phrases\nWITH dm4_objects, dm4_goals, dm4_actions, doc, sentence, words,\n    object_phrases, goal_phrases,\n    REDUCE(r = [], term IN dm4_actions | \n        CASE apoc.coll.containsAll(words, [e IN term | e[0]])\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS action_phrases\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(foot_print:NE_FOOTPRINT)\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    COLLECT(DISTINCT(foot_print.text)) AS foot_prints\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_DATE)\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints,\n    COLLECT(DISTINCT(entity.text)) AS dates\nWITH doc, sentence,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints, dates\n    OPTIONAL MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity)\n        WHERE 0 < SIZE(apoc.coll.intersection(\n            ['NE_LOCATION', 'NE_ORGANIZATION', 'NE_BUILDING', 'NE_ECOLOGY', 'NE_WATERBODY'],\n            LABELS(entity)\n        ))\nRETURN doc.uid,\n    object_phrases, goal_phrases, action_phrases,\n    foot_prints, dates,\n    COLLECT(DISTINCT(entity.text)) AS entities,\n    sentence.text;\n\n",
           "width": "12",
+          "type": "table",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 5 - Input",
+      "reports": [
+        {
+          "title": "Description",
+          "query": "For case 5, we look for the bullets inside PATH document starting with *Conditions that relate to monitoring and reporting of implementation of offsetting measures* (or similar). First we need to *scan* to see how this text can vary document to document. Then we extract dates from each sentence and predefined key phrases if any.\n\n\n\n",
+          "width": "6",
+          "type": "text",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Terms",
+          "query": "WITH\n    [\n        \"photographic record\",\n        \"visual inspection\",\n        \"underwater imagery\",\n        \"fish species assessment\",\n        \"stable isotope analysis\",\n        \"written report\",\n        \"riparian revegetation assessment\",\n        \"assessment result\",\n        \"distribution assessment\",\n        \"habitat assessment\",\n        \"assessment study\",\n        \"riparian disturbance assessment\",\n        \"offsetting measure\",\n        \"post-construction monitoring\",\n        \"postconstruction monitoring\",\n        \"monitoring\"\n    ] AS key_phrases,\n    \"http://stanford_nlp:9000/?properties={'outputFormat':'json'}\"  AS stanford_url,\n    \"http://nltk_nlp:6543/stem\"  AS nltk_url\nMERGE (n:DM5)\n    SET \n        n.key_phrases = apoc.convert.toJson(custom.run_nlp(key_phrases, stanford_url, nltk_url))\nRETURN\n    SIZE(apoc.convert.fromJsonList(n.key_phrases)) AS key_phrases;\n\n",
+          "width": 3,
+          "type": "value",
+          "height": 3,
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "Authorizations",
+          "query": "WITH\n    [\n        '16-HCAA-01734',\n        '17-HCAA-00829',\n        '18-HCAA-00253'\n    ] AS path_uid_list\nMERGE (n:DM5)\n    SET n.path_uid_list = path_uid_list\nRETURN SIZE(path_uid_list) AS path_uid_list;",
+          "width": "3",
+          "type": "value",
+          "height": "3",
+          "selection": {},
+          "settings": {}
+        }
+      ]
+    },
+    {
+      "title": "Case 5 - Output",
+      "reports": [
+        {
+          "title": "Query",
+          "query": "MATCH (n:DM5)\nWITH\n    apoc.convert.fromJsonList(n.key_phrases) AS dm5_key_phrases,\n    n.path_uid_list AS path_uid_list\n    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)\n    WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND \n        SIZE(r.item) = 2 AND\n        s.text =~ 'Conditions\\\\s+that\\\\s+relate\\\\s+to\\\\s+monitoring\\\\s+and\\\\s+reporting\\\\s+of(\\\\s+implementation\\\\s+of)?\\\\s+(offsetting\\\\s+measures|compensation|habitat\\\\s+offsets).*'\nWITH dm5_key_phrases, doc, r.item AS ri\n    MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)\n        WHERE r.item STARTS WITH ri AND r.item <> ri\nWITH dm5_key_phrases, doc, sentence ORDER BY doc.uid ASC, r.i ASC\n    MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_DATE)\nWITH dm5_key_phrases, doc, sentence, COLLECT(DISTINCT(entity.text)) AS dates\n    OPTIONAL MATCH (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)\nWITH dm5_key_phrases, doc, sentence, dates, COLLECT(DISTINCT(word.stem)) AS words\nWITH dm5_key_phrases, doc, sentence, dates, COLLECT(words) AS key_phrases\nWITH dm5_key_phrases, doc, sentence, dates,\n    REDUCE(r = [], term IN dm5_key_phrases | \n        CASE ANY(phrase IN key_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))\n            WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END\n    ) AS key_phrases\nRETURN doc.uid, dates, key_phrases, sentence.text;\n\n\n",
+          "width": "8",
           "type": "table",
           "height": "3",
           "selection": {},

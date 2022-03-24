@@ -593,6 +593,180 @@ Below is the textual output.
 | 17-HCAA-01168 | [17,170 m2 of fish habitat]                                               | [[[permanent,alteration]]]                | [[[coffer,dam],[construction]]]                                          | [[river]]                   | The permanent alteration of 17,170 m2 of fish habitat associated with the construction of coffer dams in the river during the project.                                                                                                                                                                                                                                                              |   |
 | 17-HCAA-01168 | [129 m2,6,096 m2,2,672 m2,8,897 m2 of fish habitat,43 m2,394 m2,5,702 m2] | [[[destruction]]]                         | [[[abutment],[berms],[construction],[infilling],[instream,pier],[pier]]] | [[river]]                   | The destruction of 8,897 m2 of fish habitat including: 6,096 m2 associated with infilling along the west (5,702 m2) and east (394 m2) shorelines of the river to construct the two abutments; 2,672 m2 associated with the construction of a toe berm along the front of the left (west) bank abutment; and, 129 m2 associated with the construction of three instream concrete piers (43 m2 each). |   |
 
+#### G.2.3 Case 5
+
+##### G.2.3.1 Analysis
+
+For case 5, we look for the bullets inside PATH document starting with *Conditions that relate to monitoring and reporting of implementation of offsetting measures* (or similar). First we need to *scan* to see how this text can vary document to document. By assumming that most of these bullets are at **'5'**
+
+    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+        WHERE r.item IN ['5.']
+    RETURN DISTINCT(s.text), COUNT(*);
+
+The result shows as below,
+
+| (s.text)                                                                                                                                                                                              | COUNT(*) |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| Conditions that relate to monitoring and reporting of offsetting measures (described above in section 4):                                                                                             | 38       |
+| Conditions that relate to monitoring and reporting of compensation (described above):                                                                                                                 | 7        |
+| Conditions that relate to monitoring and reporting of habitat offsets (described above):                                                                                                              | 2        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4):                                                                           | 154      |
+| Conditions that relate to monitoring and reporting of offsetting measures (described  above in section 4):                                                                                            | 2        |
+| Conditions that relate to monitoring and reporting of measures and standards to avoid and mitigate serious harm to fish from project related shipping:                                                | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures  (described in section 4):                                                                                | 2        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above under condition 4):                                                                      | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in condition 4):                                                                         | 5        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in Section 4)                                                                            | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4)                                                                            | 3        |
+| Conditions that relate to monitoring and reporting or implementation of offsetting measures (described above in section 4):                                                                           | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4);                                                                           | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described in section 4):                                                                                 | 11       |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures(described above in section 4):                                                                            | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (as described in Condition 4 above)                                                                       | 5        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4): N/A                                                                       | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in Condition 4):                                                                         | 1        |
+| Conditions that relate to the offsetting of the serious harm to fish likely to result from the authorized work, undertaking or activity                                                               | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4):Not applicable at this time (see Condition 4.2 above)                      | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4): Not applicable at this time (see Condition 4.2 above)                     | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4): Not applicable at this time.                                              | 2        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4):Not applicable at this time.                                               | 1        |
+| Details shall be provided as per 4.2.                                                                                                                                                                 | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures:                                                                                                          | 1        |
+| Conditions that relate to monitoring and reporting of works to be included in the habitat banking agreement between the City of Kitchener and DFO:                                                    | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures  (described above in section 4): Not applicable at this time due to the emergency nature of the  project. | 1        |
+| An offsetting monitoring plan shall be provided with the offsetting proposal as per 4.2.                                                                                                              | 1        |
+| Details shall be provided as per 4.2,                                                                                                                                                                 | 1        |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures  (described above in section 4):                                                                          | 2        |
+
+Then we combine possible bullet texts into a single regular expression,
+
+    'Conditions\\s+that\\s+relate\\s+to\\s+monitoring\\s+and\\s+reporting\\s+of(\\s+implementation\\s+of)?\\s+(offsetting\\s+measures|compensation|habitat\\s+offsets).*'
+
+and forming a test query to see how many documents contains this text at a *first level* bullet (e.g. *4., 5., 6., 7., ...*)
+
+    MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+        WHERE SIZE(r.item) = 2 AND
+            s.text =~ 'Conditions\\s+that\\s+relate\\s+to\\s+monitoring\\s+and\\s+reporting\\s+of(\\s+implementation\\s+of)?\\s+(offsetting\\s+measures|compensation|habitat\\s+offsets).*'
+    RETURN DISTINCT(s.text), COUNT(*) AS count, COLLECT(DISTINCT(r.item)) AS bullets;
+
+The result shows **246** such documents (the *count* column shows the number of documents with the same text, the *bullets* columns show the bullets containing such text).
+
+| (s.text)                                                                                                                                                                                              | count | bullets |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|---------|
+| Conditions that relate to monitoring and reporting of offsetting measures (described above in section 4):                                                                                             | 38    | [5.]    |
+| Conditions that relate to monitoring and reporting of compensation (described above):                                                                                                                 | 7     | [5.]    |
+| Conditions that relate to monitoring and reporting of habitat offsets (described above):                                                                                                              | 2     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4):                                                                           | 154   | [5.]    |
+| Conditions that relate to monitoring and reporting of offsetting measures (described  above in section 4):                                                                                            | 2     | [5.]    |
+| Conditions that relate to monitoring and reporting of offsetting measures (described above in section 6:                                                                                              | 1     | [7.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures  (described in section 4):                                                                                | 2     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above under condition 4):                                                                      | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in condition 4):                                                                         | 5     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in Section 4)                                                                            | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4)                                                                            | 3     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4);                                                                           | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described in section 4):                                                                                 | 11    | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures(described above in section 4):                                                                            | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (as described in Condition 4 above)                                                                       | 5     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4): N/A                                                                       | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in Condition 4):                                                                         | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 5):                                                                           | 1     | [7.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4):Not applicable at this time (see Condition 4.2 above)                      | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4): Not applicable at this time (see Condition 4.2 above)                     | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4): Not applicable at this time.                                              | 2     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures (described above in section 4):Not applicable at this time.                                               | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures:                                                                                                          | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures  (described above in section 4): Not applicable at this time due to the emergency nature of the  project. | 1     | [5.]    |
+| Conditions that relate to monitoring and reporting of implementation of offsetting measures  (described above in section 4):                                                                          | 2     | [5.]    |
+
+##### G.2.3.2 Input terms and list of authorizations
+
+Now, we need to prapare the list of terms, process them, and store them into a new **DM5** node
+
+    WITH
+        [
+            "photographic record",
+            "visual inspection",
+            "underwater imagery",
+            "fish species assessment",
+            "stable isotope analysis",
+            "written report",
+            "riparian revegetation assessment",
+            "assessment result",
+            "distribution assessment",
+            "habitat assessment",
+            "assessment study",
+            "riparian disturbance assessment",
+            "offsetting measure",
+            "post-construction monitoring",
+            "postconstruction monitoring",
+            "monitoring"
+        ] AS key_phrases,
+        "http://stanford_nlp:9000/?properties={'outputFormat':'json'}"  AS stanford_url,
+        "http://nltk_nlp:6543/stem"  AS nltk_url
+    MERGE (n:DM5)
+        SET 
+            n.key_phrases = apoc.convert.toJson(custom.run_nlp(key_phrases, stanford_url, nltk_url))
+    RETURN
+        SIZE(apoc.convert.fromJsonList(n.key_phrases)) AS key_phrases;
+
+as well a the list of authorizations,
+
+    WITH
+        [
+            '16-HCAA-01734',
+            '17-HCAA-00829',
+            '18-HCAA-00253'
+        ] AS path_uid_list
+    MERGE (n:DM5)
+        SET n.path_uid_list = path_uid_list
+    RETURN SIZE(path_uid_list) AS path_uid_list;
+
+##### G.2.3.3 The query
+
+Finally the query itself
+
+    MATCH (n:DM5)
+    WITH
+        apoc.convert.fromJsonList(n.key_phrases) AS dm5_key_phrases,
+        n.path_uid_list AS path_uid_list
+        MATCH (doc:PATH)-[r:HAS_SENTENCE {section: 'c'}]-(s:SENTENCE)
+        WHERE CASE SIZE(path_uid_list) > 0 WHEN TRUE THEN doc.uid IN path_uid_list ELSE TRUE END AND 
+            SIZE(r.item) = 2 AND
+            s.text =~ 'Conditions\\s+that\\s+relate\\s+to\\s+monitoring\\s+and\\s+reporting\\s+of(\\s+implementation\\s+of)?\\s+(offsetting\\s+measures|compensation|habitat\\s+offsets).*'
+    WITH dm5_key_phrases, doc, r.item AS ri
+        MATCH (doc)-[r:HAS_SENTENCE {section: 'c'}]-(sentence:SENTENCE)
+            WHERE r.item STARTS WITH ri AND r.item <> ri
+    WITH dm5_key_phrases, doc, sentence ORDER BY doc.uid ASC, r.i ASC
+        MATCH (sentence)-[:HAS_NAMED_ENTITY]->(entity:NE_DATE)
+    WITH dm5_key_phrases, doc, sentence, COLLECT(DISTINCT(entity.text)) AS dates
+        OPTIONAL MATCH (sentence)-[:HAS_KEY_PHRASE]->(key_phrase:KEY_PHRASE)-[:HAS_WORD]->(word:WORD)
+    WITH dm5_key_phrases, doc, sentence, dates, COLLECT(DISTINCT(word.stem)) AS words
+    WITH dm5_key_phrases, doc, sentence, dates, COLLECT(words) AS key_phrases
+    WITH dm5_key_phrases, doc, sentence, dates,
+        REDUCE(r = [], term IN dm5_key_phrases | 
+            CASE ANY(phrase IN key_phrases WHERE apoc.coll.containsAll(phrase, [e IN term | e[0]]))
+                WHEN TRUE THEN r + [[e IN term | e[1]]] ELSE r END
+        ) AS key_phrases
+    RETURN doc.uid, dates, key_phrases, sentence.text;
+
+##### G.2.3.4 The result
+
+| doc.uid       | dates                                                                     | key_phrases                                                                                                                                      | sentence.text                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+|---------------|---------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 16-HCAA-01734 | [once,December 31 2019]                                                   | [[stable,isotope,analysis]]                                                                                                                      | The stable isotope analysis study shall be deemed successful once the postconstruction data are collected and final report/results are submitted to DFO by December 31 2019.                                                                                                                                                                                                                                                                                                              |
+| 16-HCAA-01734 | [2018,spring,summer]                                                      | [[fish,species,assessment],[offsetting,measure]]                                                                                                 | Fish species assessments will be undertaken by a qualified biologist and completed for the in- water offset measures, using multiple non-lethal gear types in a standardized and repeatable manner, over 5 years in year 1, 3 and 5 starting in 2018 in the spring and summer; and,                                                                                                                                                                                                       |
+| 16-HCAA-01734 | [2018]                                                                    | [[photographic,record]]                                                                                                                          | A digital photographic record of preconstruction, during construction and postconstruction conditions shall be compiled using the same vantage points and direction to show that the approved works have been completed in accordance with the Offsetting Plan over 5 years in year 1, 3 and 5 starting in 2018;                                                                                                                                                                          |
+| 16-HCAA-01734 | [December 21, 2016]                                                       | [[offsetting,measure],[monitoring]]                                                                                                              | Schedule(s) and criteria:The Proponent shall conduct monitoring of the implementation of offsetting measures according to the approved timeline and criteria below and as set out within the approved Offsetting Plan contained within the Goderich Harbour Wharf Expansion Fisheries ACT Application dated December 21, 2016 and supporting information, or any subsequent version, approved by DFO:                                                                                     |
+| 16-HCAA-01734 | [2018]                                                                    | [[visual,inspection],[underwater,imagery]]                                                                                                       | The function and stability of submerged physical structures shall be assessed by visual inspection and underwater imagery over 5 years in year 1, 3 and 5 starting in 2018;                                                                                                                                                                                                                                                                                                               |
+| 16-HCAA-01734 | [December 31, 2019,December 31, 2018,December 31, 2022,December 31, 2020] | [[underwater,imagery],[stable,isotope,analysis],[written,report]]                                                                                | Written reports (as described above under conditions 5.1.1.1 to 5.1.1.4) including photographs, underwater imagery and georeferenced maps shall be submitted in an annual report to DFO on or before December 31, 2018 (Year 1, Swan Lake wetland and habitat pod projects); December 31, 2019 (stable isotope analysis study only), December 31, 2020 (Year 3, Swan Lake wetland and habitat pod projects); and, December 31, 2022 (Year 5, Swan Lake wetland and habitat pod projects). |
+| 17-HCAA-00829 | [once]                                                                    | []                                                                                                                                               | This component of the offsetting plan only needs to be undertaken once.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 17-HCAA-00829 | [December 31, 2018,2020,2019]                                             | [[riparian,revegetation,assessment],[assessment,result],[monitoring]]                                                                            | The riparian revegetation assessment results shall be provided in the Years 1, 2 and 3 Post- Construction Monitoring Reports which are due on or before December 31, 2018, 2019 and 2020, respectively.                                                                                                                                                                                                                                                                                   |
+| 17-HCAA-00829 | [August 31, 2018]                                                         | [[distribution,assessment],[habitat,assessment],[assessment,study],[riparian,disturbance,assessment]]                                            | The Mapleleaf distribution/habitat assessment study and riparian disturbance assessment shall be completed before August 31, 2018.                                                                                                                                                                                                                                                                                                                                                        |
+| 17-HCAA-00829 | [December 31, 2018,the Year]                                              | [[distribution,assessment],[habitat,assessment],[assessment,study],[riparian,disturbance,assessment],[postconstruction,monitoring],[monitoring]] | The Mapleleaf distribution/habitat assessment study and riparian disturbance assessment shall be provided to DFO, including a copy to the Senior Species at Risk Biologist identified above, as a separate report or as part of the Year 1 PostConstruction Monitoring Report which is due by no later than December 31, 2018.                                                                                                                                                            |
+| 18-HCAA-00253 | [January 15 *, 2023]                                                      | [[offsetting,measure]]                                                                                                                           | The Proponent shall report to DFO on whether the offsetting measures were conducted according to the conditions of this authorization by providing a report to be submitted no later than January 15*, 2023 .                                                                                                                                                                                                                                                                             |
+| 18-HCAA-00253 | [2023,December,December 31st, 2025,December 31st, 2024]                   | [[postconstruction,monitoring],[monitoring]]                                                                                                     | The Proponent shall engage in postconstruction monitoring of the offset works for a period of three years following the completion of offsetting works with reports submitted to DFO by December 31s1, 2023, December 31st, 2024, and December 31st, 2025.                                                                                                                                                                                                                                |
+
 ### H. Refactorings
 
 ### H.1 Reprocessing a a few xhtml document
